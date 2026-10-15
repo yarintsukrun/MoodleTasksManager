@@ -1,0 +1,115 @@
+/* Status toggle: 44px target, 24px mark. todo = empty ring, doing = half-filled, done = filled + check. */
+.status-toggle {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  inline-size: var(--touch);
+  block-size: var(--touch);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--text-muted);
+}
+.status-toggle:hover {
+  background: var(--surface-2);
+}
+.status-toggle__mark {
+  display: grid;
+  place-items: center;
+  inline-size: 24px;
+  block-size: 24px;
+  border: 2px solid var(--border-strong);
+  border-radius: 50%;
+  transition:
+    background var(--dur) var(--ease),
+    border-color var(--dur) var(--ease);
+}
+.status-toggle--doing .status-toggle__mark {
+  border-color: var(--warning);
+  /* Fill the inline-start half (right side in RTL). */
+  background: linear-gradient(to left, var(--warning) 50%, transparent 50%);
+}
+.status-toggle--done .status-toggle__mark {
+  border-color: var(--success);
+  background: var(--success);
+  color: var(--surface);
+}
+.status-toggle__mark svg {
+  inline-size: 16px;
+  block-size: 16px;
+  stroke-width: 3;
+}
+
+/* Undo toast — floats above the mobile bottom nav. */
+.undo-toast-region {
+  position: fixed;
+  z-index: 40;
+  inset-inline: var(--space-4);
+  inset-block-end: calc(var(--nav-h) + env(safe-area-inset-bottom) + var(--space-3));
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+.undo-toast {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  inline-size: min(100%, 480px);
+  padding-block: var(--space-1);
+  padding-inline: var(--space-4) var(--space-1);
+  border-radius: var(--radius-md);
+  background: var(--text);
+  color: var(--bg);
+  box-shadow: var(--shadow-3);
+  pointer-events: auto;
+  animation: undo-in calc(var(--dur) * 1.2) var(--ease);
+}
+.undo-toast__icon {
+  flex: none;
+  inline-size: 20px;
+  block-size: 20px;
+}
+.undo-toast__text {
+  flex: 1;
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--fs-sm);
+}
+.undo-toast__btn {
+  flex: none;
+  min-block-size: var(--touch);
+  padding-inline: var(--space-3);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.undo-toast__btn:hover,
+.undo-toast .icon-btn:hover {
+  background: color-mix(in srgb, var(--bg) 18%, transparent);
+  color: inherit;
+}
+.undo-toast .icon-btn {
+  color: inherit;
+}
+.undo-toast :focus-visible {
+  outline-color: var(--bg);
+}
+@keyframes undo-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+@media (min-width: 900px) {
+  .undo-toast-region {
+    inset-block-end: var(--space-6);
+    inset-inline-start: calc(var(--sidebar-w) + var(--space-4));
+  }
+}

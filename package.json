@@ -1,0 +1,13 @@
+{
+  "name": "moodle-tasks-manager",
+  "private": true,
+  "type": "module",
+  "workspaces": ["packages/core", "web"],
+  "scripts": {
+    "dev": "npm run dev -w web",
+    "build": "npm run build -w packages/core && npm run build -w web",
+    "test": "npm run test -w packages/core",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "fetch-ics": "node --env-file-if-exists=.env scripts/fetch-ics.mjs"
+  }
+}

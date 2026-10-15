@@ -1,0 +1,205 @@
+/*
+ * Design tokens. Light is the default; dark applies via prefers-color-scheme unless
+ * <html data-theme="light"> is set, or always with <html data-theme="dark">.
+ *
+ * Course colors: --course-0 … --course-7 are "ink" colors with ≥4.5:1 contrast on --surface
+ * and --bg in their theme (usable for text, dots, borders). --course-N-soft is a tint for
+ * backgrounds; put --text on top of it. Never convey meaning by color alone.
+ */
+:root {
+  color-scheme: light;
+
+  /* Surfaces & text */
+  --bg: #f6f7fb;
+  --surface: #ffffff;
+  --surface-2: #eef0f6;
+  --surface-3: #e2e6ef;
+  --border: #d5dae5;
+  --border-strong: #aeb6c7;
+  --text: #161a23;
+  --text-muted: #4f5869; /* 7.0:1 on surface */
+  --text-subtle: #667085; /* 4.9:1 on surface */
+  --overlay: rgb(15 18 26 / 0.45);
+
+  /* Brand / interactive */
+  --primary: #3b5bdb;
+  --primary-hover: #2f4bc0;
+  --primary-soft: #e6ebfd;
+  --on-primary: #ffffff;
+  --focus-ring: #3b5bdb;
+
+  /* Urgency (always paired with text + icon) */
+  --danger: #c4231b;
+  --danger-soft: #fde8e6;
+  --warning: #9a5800;
+  --warning-soft: #fff1d6;
+  --success: #17803d;
+  --success-soft: #e2f5e8;
+  --neutral: #4f5869;
+  --neutral-soft: #eef0f6;
+
+  /* Event-type accents */
+  --type-assignment: #3b5bdb;
+  --type-quiz: #a33ec9;
+  --type-class: #0f766e;
+  --type-online: #0b6fb0;
+  --type-other: #5f6878;
+
+  /* Course palette (light) */
+  --course-0: #1d4ed8; /* blue    6.7:1 */
+  --course-1: #047857; /* emerald 5.5:1 */
+  --course-2: #6d28d9; /* violet  7.1:1 */
+  --course-3: #c2410c; /* orange  5.2:1 */
+  --course-4: #be185d; /* pink    6.0:1 */
+  --course-5: #0e7490; /* cyan    5.4:1 */
+  --course-6: #a16207; /* amber   4.9:1 */
+  --course-7: #4d7c0f; /* lime    5.1:1 */
+  --course-none: #5f6878;
+
+  /* Spacing (4px base) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+
+  /* Radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-pill: 999px;
+
+  /* Shadows */
+  --shadow-1: 0 1px 2px rgb(16 24 40 / 0.06), 0 1px 3px rgb(16 24 40 / 0.08);
+  --shadow-2: 0 4px 12px rgb(16 24 40 / 0.1);
+  --shadow-3: 0 12px 32px rgb(16 24 40 / 0.18);
+
+  /* Typography */
+  --font: 'Heebo', 'Assistant', system-ui, -apple-system, 'Segoe UI', Arial, sans-serif;
+  --fs-xs: 0.75rem;
+  --fs-sm: 0.875rem;
+  --fs-md: 1rem;
+  --fs-lg: 1.125rem;
+  --fs-xl: 1.375rem;
+  --fs-2xl: 1.75rem;
+
+  /* Layout & motion */
+  --touch: 44px;
+  --nav-h: 64px;
+  --sidebar-w: 232px;
+  --content-max: 1080px;
+  --dur: 180ms;
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* Course tints (derived, theme-aware via color-mix) */
+:root {
+  --course-0-soft: color-mix(in srgb, var(--course-0) 14%, var(--surface));
+  --course-1-soft: color-mix(in srgb, var(--course-1) 14%, var(--surface));
+  --course-2-soft: color-mix(in srgb, var(--course-2) 14%, var(--surface));
+  --course-3-soft: color-mix(in srgb, var(--course-3) 14%, var(--surface));
+  --course-4-soft: color-mix(in srgb, var(--course-4) 14%, var(--surface));
+  --course-5-soft: color-mix(in srgb, var(--course-5) 14%, var(--surface));
+  --course-6-soft: color-mix(in srgb, var(--course-6) 14%, var(--surface));
+  --course-7-soft: color-mix(in srgb, var(--course-7) 14%, var(--surface));
+  --course-none-soft: color-mix(in srgb, var(--course-none) 14%, var(--surface));
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --bg: #12141a;
+    --surface: #1a1d25;
+    --surface-2: #232733;
+    --surface-3: #2d3240;
+    --border: #353b4a;
+    --border-strong: #545c70;
+    --text: #eceef4;
+    --text-muted: #b3bac8;
+    --text-subtle: #959db0;
+    --overlay: rgb(0 0 0 / 0.6);
+    --primary: #8aa2ff;
+    --primary-hover: #a5b8ff;
+    --primary-soft: #252d4d;
+    --on-primary: #10131c;
+    --focus-ring: #8aa2ff;
+    --danger: #ff7b72;
+    --danger-soft: #3d1c1c;
+    --warning: #f0b34a;
+    --warning-soft: #3a2c12;
+    --success: #5ad48a;
+    --success-soft: #16301f;
+    --neutral: #b3bac8;
+    --neutral-soft: #232733;
+    --type-assignment: #8aa2ff;
+    --type-quiz: #d79cf0;
+    --type-class: #4fd1c0;
+    --type-online: #6cc3f5;
+    --type-other: #a3abbb;
+    --course-0: #7aa2ff;
+    --course-1: #34d399;
+    --course-2: #b69cff;
+    --course-3: #fb923c;
+    --course-4: #f472b6;
+    --course-5: #22d3ee;
+    --course-6: #facc15;
+    --course-7: #a3e635;
+    --course-none: #a3abbb;
+    --shadow-1: 0 1px 2px rgb(0 0 0 / 0.4);
+    --shadow-2: 0 4px 12px rgb(0 0 0 / 0.45);
+    --shadow-3: 0 12px 32px rgb(0 0 0 / 0.6);
+  }
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #12141a;
+  --surface: #1a1d25;
+  --surface-2: #232733;
+  --surface-3: #2d3240;
+  --border: #353b4a;
+  --border-strong: #545c70;
+  --text: #eceef4;
+  --text-muted: #b3bac8;
+  --text-subtle: #959db0;
+  --overlay: rgb(0 0 0 / 0.6);
+  --primary: #8aa2ff;
+  --primary-hover: #a5b8ff;
+  --primary-soft: #252d4d;
+  --on-primary: #10131c;
+  --focus-ring: #8aa2ff;
+  --danger: #ff7b72;
+  --danger-soft: #3d1c1c;
+  --warning: #f0b34a;
+  --warning-soft: #3a2c12;
+  --success: #5ad48a;
+  --success-soft: #16301f;
+  --neutral: #b3bac8;
+  --neutral-soft: #232733;
+  --type-assignment: #8aa2ff;
+  --type-quiz: #d79cf0;
+  --type-class: #4fd1c0;
+  --type-online: #6cc3f5;
+  --type-other: #a3abbb;
+  --course-0: #7aa2ff;
+  --course-1: #34d399;
+  --course-2: #b69cff;
+  --course-3: #fb923c;
+  --course-4: #f472b6;
+  --course-5: #22d3ee;
+  --course-6: #facc15;
+  --course-7: #a3e635;
+  --course-none: #a3abbb;
+  --shadow-1: 0 1px 2px rgb(0 0 0 / 0.4);
+  --shadow-2: 0 4px 12px rgb(0 0 0 / 0.45);
+  --shadow-3: 0 12px 32px rgb(0 0 0 / 0.6);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur: 0ms;
+  }
+}

@@ -1,0 +1,37 @@
+/* Semester load map. Intensity is also given as a number in every cell (not color only). */
+.sem-heat { display: flex; gap: var(--space-2); overflow-x: auto; padding-block: var(--space-1) var(--space-2); }
+.sem-cell {
+  flex: none; display: flex; flex-direction: column; align-items: center; gap: 2px;
+  min-inline-size: var(--touch); padding: var(--space-1);
+  border: 2px solid transparent; border-radius: var(--radius-md);
+  background: transparent; color: var(--text);
+}
+.sem-cell[aria-pressed='true'] { border-color: var(--border-strong); background: var(--surface-2); }
+.sem-cell__box {
+  display: inline-grid; place-items: center; grid-auto-flow: column;
+  inline-size: 40px; block-size: 40px; border-radius: var(--radius-sm);
+  font-weight: 700; background: var(--surface-2); color: var(--text);
+}
+.sem-legend .sem-cell__box { inline-size: 16px; block-size: 16px; }
+.sem-cell__box[data-level='1'], [data-level='1'] > .sem-cell__box { background: color-mix(in srgb, var(--primary) 15%, var(--surface)); }
+.sem-cell__box[data-level='2'], [data-level='2'] > .sem-cell__box { background: color-mix(in srgb, var(--primary) 30%, var(--surface)); }
+.sem-cell__box[data-level='3'], [data-level='3'] > .sem-cell__box { background: color-mix(in srgb, var(--primary) 50%, var(--surface)); }
+.sem-cell__box[data-level='4'], [data-level='4'] > .sem-cell__box { background: var(--primary); color: var(--on-primary); }
+.sem-cell.is-current .sem-cell__box { outline: 3px solid var(--warning); outline-offset: 2px; }
+.sem-cell__n { font-size: var(--fs-sm); font-weight: 600; }
+.sem-cell__date { font-size: var(--fs-xs); color: var(--text-muted); white-space: nowrap; }
+.sem-legend { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); }
+.sem-legend__item { display: inline-flex; align-items: center; gap: var(--space-1); }
+.sem-insights { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: var(--space-1); font-weight: 600; }
+.sem-group { --stack-gap: var(--space-2); }
+.sem-list { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: var(--space-1); }
+.sem-row {
+  inline-size: 100%; min-block-size: var(--touch);
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2);
+  padding: var(--space-2); text-align: start;
+  border: 1px solid var(--border); border-radius: var(--radius-md);
+  background: var(--surface); color: var(--text);
+}
+.sem-row:hover { background: var(--surface-2); }
+.sem-row__title { flex: 1; min-inline-size: 8rem; font-weight: 600; }
+.sem-done { color: var(--success); font-size: var(--fs-sm); font-weight: 600; }

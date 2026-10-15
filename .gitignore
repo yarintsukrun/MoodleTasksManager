@@ -1,0 +1,15 @@
+node_modules/
+dist/
+coverage/
+*.log
+.DS_Store
+
+# Secrets — never commit
+.env
+.env.*
+!.env.example
+
+# Real calendars pulled from Moodle (contain personal data)
+fixtures/private/
+*.ics
+!packages/core/test/fixtures/*.ics
