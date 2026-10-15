@@ -1,10 +1,10 @@
 // Demo data: a realistic fake HUJI semester as a Moodle-style .ics string, generated relative to "now"
 // so it flows through the exact same importIcs() path as a real export.
-// Mimics Moodle 5 export: UID "<id>@moodle.huji.ac.il/2025-26", CATEGORIES "<course#>-<name>", UTC instants,
+// Mimics Moodle 5 export: UID "<id>@moodle.huji.ac.il/2026-27", CATEGORIES "<course#>-<name>", UTC instants,
 // DTSTART == DTEND for deadlines, and only events from 5 days back onward (like "recentupcoming"/custom).
 
 const TZ = 'Asia/Jerusalem';
-const HOST = 'moodle.huji.ac.il/2025-26';
+const HOST = 'moodle.huji.ac.il/2026-27';
 const DAY = 86_400_000;
 
 type YMD = { y: number; m: number; d: number };

@@ -55,9 +55,25 @@ export function parseCourseShortname(shortname: string): { courseId: string; cou
   return { courseId: s, courseName: s };
 }
 
+/** Site-wide events (semester start etc.) carry this CATEGORIES value instead of a course. Language follows the requester. */
+const SITE_CATEGORY = /^(site events|אירועי מערכת|אירועי אתר)$/i;
+
+const ENTITIES: Record<string, string> = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ' };
+
+/** Moodle HTML-escapes names before writing them to iCal ("Quiz 2: LLM &amp; prompting"). */
+function decodeEntities(s: string): string {
+  return s.replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (m, code: string) => {
+    if (code[0] === '#') {
+      const n = code[1] === 'x' || code[1] === 'X' ? parseInt(code.slice(2), 16) : parseInt(code.slice(1), 10);
+      return Number.isFinite(n) ? String.fromCodePoint(n) : m;
+    }
+    return ENTITIES[code.toLowerCase()] ?? m;
+  });
+}
+
 function cleanDescription(raw: string): string {
   // ical.js already unescapes TEXT; also handle a literal "\n" left behind.
-  return raw.replace(/\\n/gi, '\n').replace(/\\,/g, ',').replace(/\\;/g, ';').replace(/\r\n?/g, '\n').trim();
+  return decodeEntities(raw.replace(/\\n/gi, '\n').replace(/\\,/g, ',').replace(/\\;/g, ';').replace(/\r\n?/g, '\n').trim());
 }
 
 function parseVevent(block: string): MoodleEvent | undefined {
@@ -75,15 +91,20 @@ function parseVevent(block: string): MoodleEvent | undefined {
 
   const at = uid.indexOf('@');
   const id = at > 0 ? uid.slice(0, at) : uid;
-  const rawSummary = (textValue(comp, 'summary') ?? '').trim();
+  const rawSummary = decodeEntities((textValue(comp, 'summary') ?? '').trim());
   const description = cleanDescription(textValue(comp, 'description') ?? '');
-  const location = textValue(comp, 'location')?.trim() || undefined;
-  const courseShortname = textValue(comp, 'categories')?.trim() || undefined;
+  const location = decodeEntities(textValue(comp, 'location')?.trim() ?? '') || undefined;
+  const category = textValue(comp, 'categories')?.trim() || undefined;
+  const isSiteEvent = category !== undefined && SITE_CATEGORY.test(category);
+  const courseShortname = isSiteEvent ? undefined : category;
   const course = courseShortname ? parseCourseShortname(courseShortname) : undefined;
   const lastModified = timeValue(comp, 'last-modified') ?? timeValue(comp, 'dtstamp') ?? 0;
   const isPoint = start === end;
 
-  const { type, title } = classify(rawSummary, description, isPoint, course !== undefined);
+  const classified = classify(rawSummary, description, isPoint, course !== undefined);
+  const { title } = classified;
+  // A site event is not something the user created, so it is never 'personal'.
+  const type = isSiteEvent && classified.type === 'personal' ? 'other' : classified.type;
 
   const event: MoodleEvent = {
     id,

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CourseSettingsList, Icon, PageHeader } from '../../components';
 import { buildDemoIcs, useStore, type ImportSummary } from '../../data';
 
-const EXPORT_URL = 'https://moodle.huji.ac.il/2025-26/calendar/export.php';
+const EXPORT_URL = 'https://moodle.huji.ac.il/2026-27/calendar/export.php';
 const MAX_BYTES = 20 * 1024 * 1024;
 
 type Status = { kind: 'idle' } | { kind: 'busy' } | { kind: 'error'; message: string } | { kind: 'done'; summary: ImportSummary };

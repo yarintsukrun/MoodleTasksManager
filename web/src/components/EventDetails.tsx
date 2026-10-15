@@ -1,13 +1,19 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import type { EventType, MoodleEvent, TaskStatus } from '@mtm/core';
-import { deadlineTone, fmtDate, fmtDeadline, fmtRelative, fmtTimeRange, getUrgency, isDeadlineType, useNow, useStore } from '../data';
+import { deadlineTone, fmtDate, fmtDeadline, fmtRelative, fmtTime, fmtTimeRange, getUrgency, isDeadlineType, useNow, useStore } from '../data';
 import { CourseBadge } from './Course';
 import { Drawer } from './Drawer';
 import { Icon } from './icons';
 import { TYPE_LABELS, TypeIcon } from './TypeIcon';
 import { UrgencyBadge } from './UrgencyBadge';
 
-export const MOODLE_UPCOMING_URL = 'https://moodle.huji.ac.il/2025-26/calendar/view.php?view=upcoming';
+export const MOODLE_UPCOMING_URL = 'https://moodle.huji.ac.il/2026-27/calendar/view.php?view=upcoming';
+
+/** The UID ("<id>@moodle.huji.ac.il/2026-27") names the Moodle instance — HUJI runs one per academic year. */
+const upcomingUrlFor = (uid: string) => {
+  const site = uid.split('@')[1];
+  return site ? `https://${site}/calendar/view.php?view=upcoming` : MOODLE_UPCOMING_URL;
+};
 
 const STATUSES: { value: TaskStatus; label: string; mark: string }[] = [
   { value: 'todo', label: 'לא התחלתי', mark: '☐' },
@@ -51,7 +57,7 @@ export function EventDetails({ event }: { event: MoodleEvent }) {
         <dt>{event.isPoint ? 'מועד' : 'זמן'}</dt>
         <dd>
           <time dateTime={new Date(event.start).toISOString()}>
-            {event.isPoint ? fmtDeadline(event.start) : `${fmtDate(event.start)} · ${fmtTimeRange(event.start, event.end)}`}
+            {event.isPoint ? (deadline ? fmtDeadline(event.start) : `${fmtDate(event.start)} · ${fmtTime(event.start)}`) : `${fmtDate(event.start)} · ${fmtTimeRange(event.start, event.end)}`}
           </time>
         </dd>
         <dt>מתי</dt>
@@ -142,7 +148,7 @@ export function EventDetails({ event }: { event: MoodleEvent }) {
         </select>
       </div>
 
-      <a className="btn btn--block" href={MOODLE_UPCOMING_URL} target="_blank" rel="noreferrer">
+      <a className="btn btn--block" href={upcomingUrlFor(event.uid)} target="_blank" rel="noreferrer">
         <Icon name="external" />
         פתח ב-Moodle
       </a>

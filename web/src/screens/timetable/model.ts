@@ -135,17 +135,25 @@ export function buildRegular(slots: WeeklySlot[], todayWeekday: number, pickEven
 function finish(cols: DayColumn[]): GridModel {
   let lo = DEFAULT_START;
   let hi = DEFAULT_END;
+  // Only sessions stretch the visible hours; a pin like a quiz opening at 00:01 must not
+  // turn the grid into a 24h column — it is drawn at the edge instead (the drawer has the exact time).
   for (const c of cols) {
     layoutLanes(c.blocks);
-    stackPins(c.pins);
     for (const b of c.blocks) {
       lo = Math.min(lo, b.start);
       hi = Math.max(hi, b.end);
     }
-    for (const p of c.pins) {
-      lo = Math.min(lo, p.labelMinute - PIN_SPAN);
-      hi = Math.max(hi, p.minute + 1);
-    }
+  }
+  lo = Math.floor(lo / 60) * 60;
+  hi = Math.ceil(hi / 60) * 60;
+  for (const c of cols) {
+    c.pins
+      .filter((p) => p.minute < lo + PIN_SPAN)
+      .sort((a, b) => a.minute - b.minute)
+      .forEach((p, i) => (p.minute = lo + PIN_SPAN * (i + 1)));
+    for (const p of c.pins) p.minute = Math.min(p.minute, hi - 1);
+    stackPins(c.pins);
+    for (const p of c.pins) lo = Math.min(lo, p.labelMinute - PIN_SPAN);
   }
   return { columns: cols, rangeStart: Math.max(0, Math.floor(lo / 60) * 60), rangeEnd: Math.min(1440, Math.ceil(hi / 60) * 60) };
 }
