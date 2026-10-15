@@ -1,4 +1,5 @@
-/* Status toggle: 44px target, 24px mark. todo = empty ring, doing = half-filled, done = filled + check. */
+/* Status tick-box: 44px target around a 24px drawn box.
+   todo = empty box · doing = one slash + half shade · done = a tick that overshoots the box, like a pen. */
 .status-toggle {
   display: inline-grid;
   place-items: center;
@@ -7,38 +8,72 @@
   block-size: var(--touch);
   padding: 0;
   border: 0;
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-sm);
   background: transparent;
-  color: var(--text-muted);
-}
-.status-toggle:hover {
-  background: var(--surface-2);
+  color: var(--ink, var(--text));
+  cursor: pointer;
 }
 .status-toggle__mark {
-  display: grid;
-  place-items: center;
-  inline-size: 24px;
-  block-size: 24px;
-  border: 2px solid var(--border-strong);
-  border-radius: 50%;
+  inline-size: 26px;
+  block-size: 26px;
+  overflow: visible;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.status-toggle__box {
+  stroke: var(--text-muted);
+  stroke-width: 1.5;
+  fill: var(--surface);
   transition:
-    background var(--dur) var(--ease),
-    border-color var(--dur) var(--ease);
+    stroke var(--dur-fast, 120ms) ease-out,
+    fill var(--dur-fast, 120ms) ease-out;
 }
-.status-toggle--doing .status-toggle__mark {
-  border-color: var(--warning);
-  /* Fill the inline-start half (right side in RTL). */
-  background: linear-gradient(to left, var(--warning) 50%, transparent 50%);
+.status-toggle:hover .status-toggle__box {
+  stroke: var(--ink, var(--text));
+  fill: color-mix(in srgb, var(--ink, var(--text)) 5%, var(--surface));
 }
-.status-toggle--done .status-toggle__mark {
-  border-color: var(--success);
-  background: var(--success);
-  color: var(--surface);
+.status-toggle__half {
+  fill: currentColor;
+  opacity: 0.16;
+  stroke: none;
 }
-.status-toggle__mark svg {
-  inline-size: 16px;
-  block-size: 16px;
-  stroke-width: 3;
+.status-toggle__stroke {
+  stroke: currentColor;
+  stroke-width: 2;
+}
+.status-toggle__tick {
+  stroke-width: 2.25;
+}
+.status-toggle--done .status-toggle__box {
+  stroke: var(--text-muted);
+}
+/* Draw the new mark in, only when the status actually changed. */
+.status-toggle--changed .status-toggle__stroke {
+  stroke-dasharray: 1;
+  animation: status-draw 140ms cubic-bezier(0.3, 0.7, 0.4, 1) both;
+}
+.status-toggle--changed .status-toggle__half {
+  animation: status-fade 140ms ease-out both;
+}
+@keyframes status-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes status-fade {
+  from {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .status-toggle--changed .status-toggle__stroke,
+  .status-toggle--changed .status-toggle__half {
+    animation: none;
+  }
 }
 
 /* Undo toast — floats above the mobile bottom nav. */
@@ -58,17 +93,20 @@
   inline-size: min(100%, 480px);
   padding-block: var(--space-1);
   padding-inline: var(--space-4) var(--space-1);
-  border-radius: var(--radius-md);
-  background: var(--text);
-  color: var(--bg);
+  border-radius: var(--radius-sm);
+  background: var(--ink, var(--text));
+  color: var(--paper, var(--bg));
   box-shadow: var(--shadow-3);
   pointer-events: auto;
-  animation: undo-in calc(var(--dur) * 1.2) var(--ease);
+  animation: undo-in 150ms ease-out;
 }
 .undo-toast__icon {
   flex: none;
   inline-size: 20px;
   block-size: 20px;
+}
+.undo-toast__label {
+  font-weight: 600;
 }
 .undo-toast__text {
   flex: 1;
@@ -92,19 +130,24 @@
 }
 .undo-toast__btn:hover,
 .undo-toast .icon-btn:hover {
-  background: color-mix(in srgb, var(--bg) 18%, transparent);
+  background: color-mix(in srgb, var(--paper, var(--bg)) 18%, transparent);
   color: inherit;
 }
 .undo-toast .icon-btn {
   color: inherit;
 }
 .undo-toast :focus-visible {
-  outline-color: var(--bg);
+  outline-color: var(--paper, var(--bg));
 }
 @keyframes undo-in {
   from {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(6px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .undo-toast {
+    animation: none;
   }
 }
 @media (min-width: 900px) {

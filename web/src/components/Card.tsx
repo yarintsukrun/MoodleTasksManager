@@ -1,6 +1,6 @@
 import type { HTMLAttributes, ReactNode } from 'react';
 
-/** Surface container. `onClick` makes it a full-width <button> card; `flat` drops the shadow. */
+/** Surface container. `onClick` makes it a full-width <button> card; Flat paper sheet with a 1px rule (`flat` kept for API compatibility). */
 export function Card({
   children,
   className = '',

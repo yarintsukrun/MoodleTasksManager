@@ -40,8 +40,10 @@ export function AppLayout() {
       {hasData && (
         <nav className="app-nav" aria-label="ניווט ראשי">
           <div className="app-nav__brand">
-            <Icon name="check" width={24} height={24} />
-            משימות Moodle
+            <span className="app-nav__brand-title">יומן הסטודנט</span>
+            <span className="app-nav__brand-sub">
+              משימות <bdi>Moodle</bdi>
+            </span>
           </div>
           <ul className="app-nav__list">
             {NAV_ITEMS.map((item) => (

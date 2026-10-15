@@ -1,37 +1,389 @@
-/* Semester load map. Intensity is also given as a number in every cell (not color only). */
-.sem-heat { display: flex; gap: var(--space-2); overflow-x: auto; padding-block: var(--space-1) var(--space-2); }
-.sem-cell {
-  flex: none; display: flex; flex-direction: column; align-items: center; gap: 2px;
-  min-inline-size: var(--touch); padding: var(--space-1);
-  border: 2px solid transparent; border-radius: var(--radius-md);
-  background: transparent; color: var(--text);
+/*
+ * Semester — "year at a glance" spread.
+ * Ink on paper, hairline rules, course colours only as highlighter marks, one red-pen accent for "now".
+ * Counts are always available as text (count numeral above each column, aria-label per week), never colour alone.
+ */
+.sem {
+  --s-ink: var(--ink, var(--text));
+  --s-muted: var(--text-muted);
+  --s-rule: var(--rule, var(--border));
+  --s-accent: var(--accent, var(--primary));
+  --s-display: var(--font-display, var(--font));
+  --s-tint: color-mix(in srgb, var(--s-ink) 5%, transparent);
+  --mark-h: 7px;
+  --mark-gap: 3px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-10, 40px);
+  color: var(--s-ink);
 }
-.sem-cell[aria-pressed='true'] { border-color: var(--border-strong); background: var(--surface-2); }
-.sem-cell__box {
-  display: inline-grid; place-items: center; grid-auto-flow: column;
-  inline-size: 40px; block-size: 40px; border-radius: var(--radius-sm);
-  font-weight: 700; background: var(--surface-2); color: var(--text);
+.sem h2,
+.sem h3 { margin: 0; }
+
+/* The page header already carries a rule; let the chart sit close under it. */
+.sem > .page-header { margin-block-end: 0; }
+.sem > .page-header + .sem-chart { margin-block-start: calc(var(--space-2, 8px) * -1); }
+
+/* ——— Shared bits ——— */
+.sem-section-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-1) var(--space-4);
+  padding-block-end: var(--space-2);
+  border-block-end: 1px solid var(--s-rule);
 }
-.sem-legend .sem-cell__box { inline-size: 16px; block-size: 16px; }
-.sem-cell__box[data-level='1'], [data-level='1'] > .sem-cell__box { background: color-mix(in srgb, var(--primary) 15%, var(--surface)); }
-.sem-cell__box[data-level='2'], [data-level='2'] > .sem-cell__box { background: color-mix(in srgb, var(--primary) 30%, var(--surface)); }
-.sem-cell__box[data-level='3'], [data-level='3'] > .sem-cell__box { background: color-mix(in srgb, var(--primary) 50%, var(--surface)); }
-.sem-cell__box[data-level='4'], [data-level='4'] > .sem-cell__box { background: var(--primary); color: var(--on-primary); }
-.sem-cell.is-current .sem-cell__box { outline: 3px solid var(--warning); outline-offset: 2px; }
-.sem-cell__n { font-size: var(--fs-sm); font-weight: 600; }
-.sem-cell__date { font-size: var(--fs-xs); color: var(--text-muted); white-space: nowrap; }
-.sem-legend { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); }
-.sem-legend__item { display: inline-flex; align-items: center; gap: var(--space-1); }
-.sem-insights { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: var(--space-1); font-weight: 600; }
-.sem-group { --stack-gap: var(--space-2); }
-.sem-list { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: var(--space-1); }
+.sem-section-head h2,
+.sem-week h2 {
+  font-family: var(--s-display);
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.sem-hint { margin: 0; font-size: var(--fs-sm, 14px); color: var(--s-muted); }
+.sem-label {
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--s-muted);
+}
+.sem-quiet { margin: 0; color: var(--s-muted); padding-block: var(--space-3); }
+.sem-now { color: var(--s-accent); font-weight: 700; }
+
+/* ——— Highlighter mark (one per deadline) ——— */
+.sem-mark {
+  display: block;
+  flex: none;
+  inline-size: min(22px, 60%);
+  block-size: var(--mark-h);
+  border-radius: 1px;
+  background: var(--c, var(--course-none));
+}
+.sem-mark--quiz { background: transparent; box-shadow: inset 0 0 0 1.5px var(--c, var(--course-none)); }
+.sem-mark.is-done { opacity: 0.32; }
+
+/* ——— The chart ——— */
+.sem-chart { display: flex; flex-direction: column; gap: var(--space-4); }
+.sem-plot {
+  display: flex;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+  padding-block-end: var(--space-1);
+  /* keep focus rings inside the scroller visible */
+  padding-inline: 2px;
+}
+.sem-col {
+  flex: 1 1 0;
+  min-inline-size: 44px;
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 0 0 var(--space-2);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  text-align: center;
+}
+.sem-col__bar {
+  position: relative;
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  gap: var(--mark-gap);
+  block-size: calc(var(--max, 4) * (var(--mark-h) + var(--mark-gap)) + 44px);
+  padding-block-end: 3px;
+  border-block-end: 1px solid var(--s-ink);
+}
+.sem-col__count {
+  font-size: 12px;
+  line-height: 1;
+  color: var(--s-muted);
+  margin-block-end: 4px;
+}
+.sem-fn {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--s-ink);
+  vertical-align: super;
+  line-height: 0;
+  margin-inline-start: 1px;
+}
+.sem-col.is-busy .sem-col__count { color: var(--s-ink); font-weight: 700; }
+.sem-col__n {
+  align-self: center;
+  margin-block-start: 6px;
+  padding-inline: 4px;
+  font-family: var(--s-display);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.sem-col__date {
+  font-size: 11px;
+  line-height: 1.3;
+  color: var(--s-muted);
+  white-space: nowrap;
+}
+.sem-col.is-past .sem-col__n { color: var(--s-muted); font-weight: 500; }
+
+/* Month names along the foot of the chart, like the running head of a planner spread. */
+.sem-col__month {
+  block-size: 1.4em;
+  margin-block-start: var(--space-2);
+  padding-inline-start: 4px;
+  border-inline-start: 1px solid transparent;
+  font-family: var(--s-display);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4em;
+  text-align: start;
+  white-space: nowrap;
+  overflow: visible;
+  color: var(--s-ink);
+}
+.sem-col__month:not(:empty) { border-inline-start-color: var(--s-rule); }
+
+/* Narrow columns show only the Sunday date; wide ones show the whole range. */
+.sem-col__start { display: none; }
+@container (max-width: 71px) {
+  .sem-col__range { display: none; }
+  .sem-col__start { display: inline; }
+}
+
+/* Selected week: quiet tint + ink underline under the week number */
+.sem-col[aria-pressed='true'] .sem-col__bar { background: var(--s-tint); }
+.sem-col[aria-pressed='true'] .sem-col__n { box-shadow: inset 0 -2px 0 var(--s-ink); }
+.sem-col:hover .sem-col__bar { background: color-mix(in srgb, var(--s-ink) 3%, transparent); }
+.sem-col[aria-pressed='true']:hover .sem-col__bar { background: var(--s-tint); }
+.sem-col:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: -2px; }
+
+/* Current week: red-pen ribbon bookmark hanging from the top edge */
+.sem-ribbon {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 50%;
+  translate: 50% 0;
+  inline-size: 12px;
+  block-size: 22px;
+  background: var(--s-accent);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 72%, 0 100%);
+}
+[dir='ltr'] .sem-ribbon { translate: -50% 0; }
+.sem-col.is-current .sem-col__bar { background: color-mix(in srgb, var(--s-accent) 6%, transparent); }
+.sem-col.is-current[aria-pressed='true'] .sem-col__bar { background: color-mix(in srgb, var(--s-accent) 10%, transparent); }
+.sem-col.is-current .sem-col__n { color: var(--s-accent); font-weight: 700; }
+
+/* Legend */
+.sem-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-6);
+  font-size: var(--fs-sm, 14px);
+  color: var(--s-muted);
+}
+.sem-legend ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+}
+.sem-legend li { display: inline-flex; align-items: center; gap: 6px; }
+.sem-legend .sem-mark { inline-size: 14px; }
+.sem-legend__courses { color: var(--s-ink); }
+.sem-legend__keys .sem-mark { --c: var(--s-muted); }
+.sem-ribbon--key { position: static; translate: none; inline-size: 9px; block-size: 14px; }
+
+/* ——— The spread: chosen week (main) + margin notes ——— */
+.sem-spread {
+  display: grid;
+  gap: var(--space-8, 32px);
+}
+@media (min-width: 960px) {
+  .sem-spread { grid-template-columns: minmax(0, 1fr) 17rem; gap: var(--space-10, 40px); align-items: start; }
+  .sem-margin { border-inline-start: 1px solid var(--s-rule); padding-inline-start: var(--space-6, 24px); }
+}
+
+.sem-week__head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-1) var(--space-4);
+  padding-block-end: var(--space-3);
+  border-block-end: 1px solid var(--s-ink);
+}
+.sem-week__stub {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-inline-size: 3rem;
+  padding-inline-end: var(--space-4);
+  border-inline-end: 1px solid var(--s-rule);
+}
+.sem-week__no {
+  font-family: var(--s-display);
+  font-size: 40px;
+  font-weight: 700;
+  line-height: 1;
+}
+.sem-week__titles { min-inline-size: 0; }
+/* Date ranges read left-to-right ("11–17.10") inside RTL text. */
+.sem-range { direction: ltr; unicode-bidi: isolate; }
+.sem-week h2 { font-size: 28px; line-height: 1.2; }
+.sem-week__sum { margin: 2px 0 0; font-size: var(--fs-sm, 14px); color: var(--s-muted); }
+.sem-week__nav { display: flex; gap: var(--space-1); }
+.sem-step {
+  min-block-size: var(--touch, 44px);
+  padding-inline: var(--space-3);
+  border: 1px solid var(--s-rule);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--s-ink);
+  font: inherit;
+  font-size: var(--fs-sm, 14px);
+  cursor: pointer;
+}
+.sem-step:hover:not(:disabled) { border-color: var(--s-ink); }
+.sem-step:disabled { color: var(--s-muted); opacity: 0.6; cursor: default; }
+
+.sem-group { margin-block-start: var(--space-5, 20px); }
+.sem-group__name {
+  font-size: var(--fs-sm, 14px);
+  font-weight: 700;
+  line-height: 1.3;
+  padding-inline-start: var(--space-2);
+  border-inline-start: 3px solid var(--c, var(--course-none));
+  margin-block-end: var(--space-1);
+}
+.sem-list { margin: 0; padding: 0; list-style: none; }
+.sem-list li + li { border-block-start: 1px solid var(--s-rule); }
 .sem-row {
-  inline-size: 100%; min-block-size: var(--touch);
-  display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2);
-  padding: var(--space-2); text-align: start;
-  border: 1px solid var(--border); border-radius: var(--radius-md);
-  background: var(--surface); color: var(--text);
+  inline-size: 100%;
+  min-block-size: var(--touch, 44px);
+  display: grid;
+  grid-template-columns: 8.5rem minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-4);
+  padding: var(--space-2) 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
 }
-.sem-row:hover { background: var(--surface-2); }
-.sem-row__title { flex: 1; min-inline-size: 8rem; font-weight: 600; }
-.sem-done { color: var(--success); font-size: var(--fs-sm); font-weight: 600; }
+.sem-row:hover { background: var(--s-tint); }
+.sem-row:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: -2px; }
+.sem-row__when { display: inline-flex; gap: var(--space-2); font-size: var(--fs-sm, 14px); color: var(--s-muted); white-space: nowrap; }
+.sem-row__time { color: var(--s-ink); }
+.sem-row__title { font-weight: 600; overflow-wrap: anywhere; }
+.sem-row__meta { font-size: var(--fs-sm, 14px); color: var(--s-muted); white-space: nowrap; }
+.sem-row__done { color: var(--success); font-weight: 600; }
+.sem-row__late { color: var(--s-accent); font-weight: 600; }
+.sem-row.is-done .sem-row__title { color: var(--s-muted); font-weight: 400; }
+
+/* Margin notes */
+.sem-margin { display: flex; flex-direction: column; gap: var(--space-2); }
+.sem-notes { margin: 0; padding: 0; list-style: none; }
+.sem-notes li + li { border-block-start: 1px solid var(--s-rule); }
+.sem-note {
+  inline-size: 100%;
+  min-block-size: var(--touch, 44px);
+  display: grid;
+  grid-template-columns: 1.25rem minmax(0, 1fr);
+  gap: var(--space-2);
+  padding: var(--space-3) 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: var(--fs-sm, 14px);
+  line-height: 1.5;
+  text-align: start;
+  cursor: pointer;
+}
+.sem-note:hover,
+.sem-note[aria-pressed='true'] { background: var(--s-tint); }
+.sem-note:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: -2px; }
+.sem-note__no { font-family: var(--s-display); font-size: 16px; font-weight: 700; line-height: 1.3; text-align: center; }
+.sem-note__body { display: flex; flex-direction: column; gap: 2px; }
+.sem-note__body strong { font-weight: 700; }
+.sem-note__body span { color: var(--s-muted); }
+
+/* ——— Per-course progress ——— */
+.sem-progress { display: flex; flex-direction: column; }
+.sem-courses { margin: 0; padding: 0; list-style: none; }
+.sem-course {
+  display: grid;
+  grid-template-columns: minmax(10rem, 1.3fr) 11rem minmax(5rem, 0.8fr) minmax(12rem, 1.5fr);
+  align-items: center;
+  gap: var(--space-2) var(--space-5, 20px);
+  padding-block: var(--space-2);
+  border-block-end: 1px solid var(--s-rule);
+}
+.sem-course__name {
+  font-weight: 600;
+  line-height: 1.35;
+  padding-inline-start: var(--space-2);
+  border-inline-start: 3px solid var(--c, var(--course-none));
+}
+.sem-course__count { font-size: var(--fs-sm, 14px); color: var(--s-muted); }
+.sem-course__count b { font-family: var(--s-display); font-size: 16px; color: var(--s-ink); }
+.sem-course__late { color: var(--s-accent); font-weight: 600; }
+.sem-course__rule { display: block; block-size: 2px; background: var(--s-rule); }
+.sem-course__rule > span { display: block; block-size: 100%; background: var(--c, var(--course-none)); }
+.sem-course__next { min-inline-size: 0; font-size: var(--fs-sm, 14px); }
+.sem-link {
+  display: block;
+  inline-size: 100%;
+  min-block-size: var(--touch, 44px);
+  padding: var(--space-2) 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+.sem-link .sem-label { margin-inline-end: var(--space-2); }
+.sem-course__next-title { font-weight: 600; text-decoration: underline; text-decoration-color: var(--s-rule); text-underline-offset: 3px; }
+.sem-link:hover .sem-course__next-title { text-decoration-color: currentColor; }
+.sem-link:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.sem-course__next > .muted { display: block; padding-block: var(--space-2); }
+
+/* ——— Narrow screens ——— */
+@media (max-width: 719px) {
+  .sem { gap: var(--space-8, 32px); }
+  .sem-course {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: 'name count' 'rule rule' 'next next';
+    row-gap: var(--space-1);
+    padding-block: var(--space-3) var(--space-1);
+  }
+  .sem-course__name { grid-area: name; }
+  .sem-course__count { grid-area: count; text-align: end; }
+  .sem-course__rule { grid-area: rule; margin-block: var(--space-1); }
+  .sem-course__next { grid-area: next; }
+  .sem-week__head { grid-template-columns: auto minmax(0, 1fr); }
+  .sem-week__nav { grid-column: 1 / -1; }
+  .sem-week__nav .sem-step { flex: 1; }
+  .sem-row { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: 'when meta' 'title title'; }
+  .sem-row__when { grid-area: when; }
+  .sem-row__meta { grid-area: meta; }
+  .sem-row__title { grid-area: title; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .sem-col__bar,
+  .sem-row,
+  .sem-note { transition: background-color 120ms ease; }
+}

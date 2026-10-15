@@ -1,7 +1,6 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import type { EventChange, MoodleEvent } from '@mtm/core';
-import { Card, CourseBadge, Icon, type IconName } from '../../components';
-import { fmtDeadline, fmtTime, getLocalParts, isDeadlineType, useStore, useVisibleEvents } from '../../data';
+import { fmtDeadline, fmtTime, getLocalParts, isDeadlineType, useCourseColorIndex, courseColorStyle, useStore, useVisibleEvents } from '../../data';
 import { dueDayInstant } from '../tasks/shared';
 
 const SHOWN = 4;
@@ -13,28 +12,82 @@ function shortWhen(t: number, withTime: boolean, deadline: boolean): string {
   return withTime ? `${p.day}.${p.month} ${fmtTime(d)}` : `${p.day}.${p.month}`;
 }
 
-function describe(c: EventChange): { icon: IconName; text: string } {
+/** One margin note: a short verb, the event name, and the dates in tabular numerals. */
+function describe(c: EventChange): { verb: string; body: ReactNode } {
   const ev = (c.after ?? c.before) as MoodleEvent;
-  const name = `"${ev.title}"`;
+  const name = <bdi>{ev.title}</bdi>;
   switch (c.kind) {
     case 'added':
-      return { icon: 'sparkle', text: `נוסף ${name}${isDeadlineType(ev.type) ? ` · ${fmtDeadline(ev.start)}` : ''}` };
+      return {
+        verb: 'נוסף',
+        body: (
+          <>
+            {name}
+            {isDeadlineType(ev.type) && <span className="num"> · {fmtDeadline(ev.start)}</span>}
+          </>
+        ),
+      };
     case 'removed':
-      return { icon: 'trash', text: `הוסר ${name}` };
+      return { verb: 'הוסר', body: <s>{name}</s> };
     case 'renamed':
-      return { icon: 'other', text: `"${c.before?.title ?? ''}" נקרא עכשיו "${c.after?.title ?? ''}"` };
+      return {
+        verb: 'שם חדש',
+        body: (
+          <>
+            <bdi>{c.before?.title ?? ''}</bdi> ← <bdi>{c.after?.title ?? ''}</bdi>
+          </>
+        ),
+      };
     case 'time_changed': {
       const from = c.before?.start ?? 0;
       const to = c.after?.start ?? 0;
       const deadline = isDeadlineType(ev.type);
       const sameDay = shortWhen(from, false, deadline) === shortWhen(to, false, deadline);
-      const verb = to > from ? 'נדחה' : 'הוקדם';
-      return { icon: 'clock', text: `${name} ${verb} מ-${shortWhen(from, sameDay, deadline)} ל-${shortWhen(to, sameDay, deadline)}${to > from && deadline ? ' 🎉' : ''}` };
+      return {
+        verb: to > from ? 'נדחה' : 'הוקדם',
+        body: (
+          <>
+            {name}
+            <span className="num">
+              {' '}
+              מ-<del>{shortWhen(from, sameDay, deadline)}</del> ל-<ins>{shortWhen(to, sameDay, deadline)}</ins>
+            </span>
+          </>
+        ),
+      };
     }
   }
 }
 
-/** "Changes since the last import" (added / moved / removed / renamed), dismissible. Hidden when empty. */
+function Note({ change: c, live, onOpen }: { change: EventChange; live: boolean; onOpen: () => void }) {
+  const ev = (c.after ?? c.before)!;
+  const idx = useCourseColorIndex(ev.courseId);
+  const { verb, body } = describe(c);
+  const course = ev.courseName ?? (ev.courseId ? ev.courseId : 'אישי');
+  const content = (
+    <>
+      <span className="today-note__text">
+        <strong className="today-note__verb">{verb}</strong> {body}
+      </span>
+      <span className="today-note__course" dir="auto">
+        {course}
+      </span>
+    </>
+  );
+  return (
+    <li className={`today-note today-note--${c.kind}`} style={courseColorStyle(idx)}>
+      {live ? (
+        <button type="button" className="today-note__row" onClick={onOpen} aria-haspopup="dialog">
+          {content}
+        </button>
+      ) : (
+        <div className="today-note__row">{content}</div>
+      )}
+    </li>
+  );
+}
+
+/** "Changes since the last import" (added / moved / removed / renamed) as margin notes, dismissible. Hidden when empty. */
 export function ChangesCard({ onOpen }: { onOpen: (id: string) => void }) {
   const { recentChanges, settings, dismissChanges } = useStore();
   const visible = useVisibleEvents();
@@ -48,49 +101,30 @@ export function ChangesCard({ onOpen }: { onOpen: (id: string) => void }) {
   const shown = all ? changes : changes.slice(0, SHOWN);
 
   return (
-    <section aria-labelledby="today-changes-h">
-      <div className="today__h-row">
-        <h2 id="today-changes-h" className="today__h">
-          <Icon name="alert" aria-hidden="true" />
-          שינויים מאז הייבוא האחרון
+    <section aria-labelledby="today-changes-h" className="today-sec today-notes">
+      <div className="today-h-row">
+        <h2 id="today-changes-h" className="today-h">
+          מאז הייבוא האחרון
         </h2>
-        <button type="button" className="btn btn--ghost small" onClick={dismissChanges}>
-          <Icon name="check" aria-hidden="true" />
+        <button type="button" className="today-link-btn" onClick={dismissChanges}>
           ראיתי
         </button>
       </div>
-      <Card flat className="today-changes">
-        <ul role="list">
-          {shown.map((c) => {
-            const { icon, text } = describe(c);
-            const ev = (c.after ?? c.before)!;
-            const live = c.kind !== 'removed' && visible.some((e) => e.id === c.eventId);
-            const body = (
-              <>
-                <Icon name={icon} aria-hidden="true" className="today-changes__icon" />
-                <span className="today-changes__text">{text}</span>
-                <CourseBadge courseId={ev.courseId} name={ev.courseName} />
-              </>
-            );
-            return (
-              <li key={`${c.kind}-${c.eventId}`} className={`today-changes__item today-changes__item--${c.kind}`}>
-                {live ? (
-                  <button type="button" className="today-changes__row" onClick={() => onOpen(c.eventId)} aria-haspopup="dialog">
-                    {body}
-                  </button>
-                ) : (
-                  <div className="today-changes__row">{body}</div>
-                )}
-              </li>
-            );
-          })}
-        </ul>
-        {changes.length > SHOWN && (
-          <button type="button" className="btn btn--ghost btn--block small" aria-expanded={all} onClick={() => setAll((v) => !v)}>
-            {all ? 'הצג פחות' : `הצג את כל ${changes.length} השינויים`}
-          </button>
-        )}
-      </Card>
+      <ul role="list" className="today-notes__list">
+        {shown.map((c) => (
+          <Note
+            key={`${c.kind}-${c.eventId}`}
+            change={c}
+            live={c.kind !== 'removed' && visible.some((e) => e.id === c.eventId)}
+            onOpen={() => onOpen(c.eventId)}
+          />
+        ))}
+      </ul>
+      {changes.length > SHOWN && (
+        <button type="button" className="today-link-btn today-notes__more" aria-expanded={all} onClick={() => setAll((v) => !v)}>
+          {all ? 'פחות' : `עוד ${changes.length - SHOWN} שינויים`}
+        </button>
+      )}
     </section>
   );
 }

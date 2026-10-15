@@ -6,7 +6,7 @@ export function CourseDot({ courseId, size = 10 }: { courseId: string | undefine
   return <span className="course-dot" aria-hidden="true" style={{ ...courseColorStyle(idx), ['--dot' as string]: `${size}px` }} />;
 }
 
-/** Pill with course color dot + name. Personal events (no courseId) render as "אישי". */
+/** Course name in ink with a short highlighter stripe in the course colour. Personal events (no courseId) render as "אישי". */
 export function CourseBadge({ courseId, name }: { courseId: string | undefined; name?: string }) {
   const idx = useCourseColorIndex(courseId);
   const label = name ?? (courseId ? courseId : 'אישי');

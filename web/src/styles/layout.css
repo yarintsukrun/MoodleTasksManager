@@ -1,23 +1,29 @@
-/* App shell: bottom nav on mobile, side nav ≥900px. */
+/*
+ * App shell — the planner's spine and index tabs.
+ * Mobile: a quiet bottom tab strip on paper; the active tab gets a red-pen ribbon at its top edge.
+ * ≥900px: a narrow index column on the inline-start side (right in RTL), closed by a double rule like a
+ * book's binding; the active entry is marked with a ribbon bookmark hanging from the outer edge.
+ */
 .app {
   min-block-size: 100dvh;
 }
 
 .app-main {
   padding-inline: var(--space-4);
-  padding-block: var(--space-4) calc(var(--nav-h) + env(safe-area-inset-bottom) + var(--space-6));
+  padding-block: var(--space-5) calc(var(--nav-h) + env(safe-area-inset-bottom) + var(--space-8));
   max-inline-size: var(--content-max);
   min-inline-size: 0;
   margin-inline: auto;
 }
 
+/* ---- Mobile: bottom tab strip ---- */
 .app-nav {
   position: fixed;
   inset-inline: 0;
   inset-block-end: 0;
   z-index: 20;
-  background: var(--surface);
-  border-block-start: 1px solid var(--border);
+  background: var(--paper);
+  border-block-start: 1px solid var(--rule);
   padding-block-end: env(safe-area-inset-bottom);
 }
 
@@ -34,54 +40,91 @@
 }
 
 .app-nav__link {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
+  gap: 3px;
   min-block-size: var(--nav-h);
   min-inline-size: var(--touch);
   padding-inline: var(--space-1);
+  padding-block-start: 2px;
   color: var(--text-muted);
   font-size: var(--fs-xs);
-  font-weight: 500;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1.2;
   text-decoration: none;
   text-align: center;
+  -webkit-tap-highlight-color: transparent;
   transition: color var(--dur) var(--ease);
 }
 .app-nav__link svg {
-  inline-size: 24px;
-  block-size: 24px;
-}
-.app-nav__link[aria-current='page'] {
-  color: var(--primary);
-  font-weight: 700;
-}
-.app-nav__link[aria-current='page'] .app-nav__icon {
-  background: var(--primary-soft);
+  inline-size: 22px;
+  block-size: 22px;
 }
 .app-nav__icon {
   display: grid;
   place-items: center;
-  inline-size: 48px;
-  block-size: 28px;
-  border-radius: var(--radius-pill);
-  transition: background var(--dur) var(--ease);
+  inline-size: 24px;
+  block-size: 24px;
+}
+.app-nav__link:hover {
+  color: var(--ink);
+}
+.app-nav__link:active {
+  color: var(--ink);
+}
+.app-nav__link[aria-current='page'] {
+  color: var(--ink);
+  font-weight: 700;
+}
+/* Ribbon: a short red-pen tab clipped to the strip's top rule. */
+.app-nav__link::before {
+  content: '';
+  position: absolute;
+  inset-block-start: -1px;
+  inset-inline: 50%;
+  translate: 50% 0;
+  inline-size: 28px;
+  block-size: 3px;
+  border-end-start-radius: 1px;
+  border-end-end-radius: 1px;
+  background: var(--accent);
+  opacity: 0;
+  transition: opacity var(--dur) var(--ease);
+}
+[dir='ltr'] .app-nav__link::before {
+  translate: -50% 0;
+}
+.app-nav__link[aria-current='page']::before {
+  opacity: 1;
+}
+.app-nav__link:focus-visible {
+  outline-offset: -4px;
 }
 
+/* ---- Global banner (errors) ---- */
 .app-banner {
   display: flex;
   align-items: flex-start;
   gap: var(--space-3);
-  margin-block-end: var(--space-4);
+  margin-block-end: var(--space-5);
   padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   background: var(--danger-soft);
-  color: var(--text);
-  border: 1px solid color-mix(in srgb, var(--danger) 40%, transparent);
+  color: var(--ink);
+  border-inline-start: 3px solid var(--danger);
+}
+.app-banner > svg {
+  flex: none;
+  margin-block-start: 2px;
+  color: var(--danger);
 }
 .app-banner__text {
   flex: 1;
+  align-self: center;
 }
 
 .app-loading {
@@ -89,8 +132,11 @@
   place-items: center;
   min-block-size: 60dvh;
   color: var(--text-muted);
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
 }
 
+/* ---- ≥900px: index column ---- */
 @media (min-width: 900px) {
   .app--nav {
     display: grid;
@@ -100,53 +146,113 @@
     position: sticky;
     inset-block: 0;
     inset-inline: auto;
+    display: flex;
+    flex-direction: column;
     block-size: 100dvh;
+    padding: var(--space-8) 0 var(--space-6);
+    background: var(--paper);
     border-block-start: 0;
-    border-inline-end: 1px solid var(--border);
-    padding: var(--space-6) var(--space-3);
+    /* Binding: two hairlines 3px apart. */
+    border-inline-end: 1px solid var(--rule);
+  }
+  .app-nav::after {
+    content: '';
+    position: absolute;
+    inset-block: 0;
+    inset-inline-end: 3px;
+    inline-size: 1px;
+    background: var(--grid-line);
+    pointer-events: none;
   }
   .app-nav__brand {
     display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    padding-inline: var(--space-3);
-    margin-block-end: var(--space-6);
-    font-weight: 700;
+    flex-direction: column;
+    gap: 2px;
+    padding-inline: var(--space-6) var(--space-5);
+    padding-block-end: var(--space-5);
+    margin-block-end: var(--space-4);
+    border-block-end: 1px solid var(--rule);
+  }
+  .app-nav__brand-title {
+    font-family: var(--font-display);
     font-size: var(--fs-lg);
+    font-weight: 700;
+    line-height: 1.15;
+    color: var(--ink);
+  }
+  .app-nav__brand-sub {
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--text-muted);
   }
   .app-nav__list {
     display: flex;
     flex-direction: column;
-    gap: var(--space-1);
+    gap: 0;
   }
   .app-nav__link {
     flex-direction: row;
     justify-content: flex-start;
     gap: var(--space-3);
     min-block-size: var(--touch);
-    padding-inline: var(--space-3);
-    border-radius: var(--radius-md);
+    padding-block: 0;
+    padding-inline: var(--space-6) var(--space-4);
     font-size: var(--fs-md);
+    font-weight: 600;
+    letter-spacing: 0;
+    color: var(--text-muted);
+    transition:
+      color var(--dur) var(--ease),
+      background-color var(--dur) var(--ease);
   }
-  .app-nav__link:hover {
-    background: var(--surface-2);
-    color: var(--text);
-  }
-  .app-nav__link[aria-current='page'] {
-    background: var(--primary-soft);
+  .app-nav__link svg {
+    inline-size: 20px;
+    block-size: 20px;
   }
   .app-nav__icon {
-    inline-size: auto;
+    inline-size: 20px;
+    block-size: 20px;
+  }
+  .app-nav__link:hover {
+    color: var(--ink);
+    background: color-mix(in srgb, var(--ink) 4%, transparent);
+  }
+  .app-nav__link[aria-current='page'] {
+    color: var(--ink);
+    font-weight: 700;
+    background: none;
+  }
+  /* Ribbon bookmark: hangs from the outer (inline-start) edge, with a V-notch at its inner end. */
+  .app-nav__link::before {
+    inset-block: 10px;
+    inset-inline: 0 auto;
+    translate: none;
+    inline-size: 10px;
     block-size: auto;
-    background: none !important;
+    border-radius: 0;
+    clip-path: polygon(0 0, 100% 0, 60% 50%, 100% 100%, 0 100%);
+  }
+  [dir='ltr'] .app-nav__link::before {
+    translate: none;
+    clip-path: polygon(0 0, 100% 0, 40% 50%, 100% 100%, 0 100%);
+  }
+  [dir='rtl'] .app-nav__link::before {
+    clip-path: polygon(100% 0, 0 0, 40% 50%, 0 100%, 100% 100%);
+  }
+  .app-nav__link[aria-current='page'] .app-nav__icon {
+    color: var(--accent);
+  }
+  .app-nav__link:focus-visible {
+    outline-offset: -2px;
   }
   .app-main {
     inline-size: 100%;
-    padding: var(--space-8) var(--space-8) var(--space-10);
+    padding: var(--space-10) var(--space-10) var(--space-12);
   }
 }
 
-/* Generic layout helpers */
+/* ---- Generic layout helpers ---- */
 .stack {
   display: flex;
   flex-direction: column;
@@ -163,4 +269,109 @@
 }
 .small {
   font-size: var(--fs-sm);
+}
+
+/* ---- Planner typography helpers (shared vocabulary for all screens) ---- */
+/* Display serif, e.g. big numbers "13 שעות". Combine with .num for tabular digits. */
+.display {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: var(--lh-tight);
+  letter-spacing: -0.005em;
+}
+.big-num {
+  font-family: var(--font-display);
+  font-size: var(--fs-2xl);
+  font-weight: 500;
+  line-height: 1;
+  font-variant-numeric: tabular-nums lining-nums;
+  letter-spacing: -0.01em;
+}
+/* Small metadata label (the planner's printed column heading). */
+.label {
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  line-height: 1.3;
+  color: var(--text-muted);
+}
+.accent {
+  color: var(--accent);
+}
+.ink {
+  color: var(--ink);
+}
+/* Hairline rules */
+.rule {
+  border: 0;
+  border-block-end: 1px solid var(--rule);
+}
+.rule-top {
+  border-block-start: 1px solid var(--rule);
+}
+/* Section heading with a hairline under it; put trailing meta in a <span class="section-head__meta">. */
+.section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding-block-end: var(--space-2);
+  margin-block-end: var(--space-3);
+  border-block-end: 1px solid var(--rule);
+}
+.section-head > h2,
+.section-head > h3 {
+  margin: 0;
+}
+.section-head__meta {
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+/* A list is a list: rows separated by hairlines, no cards. */
+.ruled-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.ruled-list > li {
+  border-block-end: 1px solid var(--rule);
+}
+.ruled-list > li:last-child {
+  border-block-end: 0;
+}
+/* Date stub: big day number + small weekday, for list group headings. */
+.date-stub {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  min-inline-size: 2.75rem;
+  line-height: 1;
+}
+.date-stub__day {
+  font-family: var(--font-display);
+  font-size: var(--fs-xl);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+.date-stub__weekday {
+  margin-block-start: 4px;
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+}
+.date-stub--today .date-stub__day {
+  color: var(--accent);
+}
+/* Main column + narrower margin column (planner margin notes). */
+.with-margin {
+  display: grid;
+  gap: var(--space-8);
+}
+@media (min-width: 1100px) {
+  .with-margin {
+    grid-template-columns: minmax(0, 1fr) minmax(220px, 300px);
+    gap: var(--space-10);
+  }
 }

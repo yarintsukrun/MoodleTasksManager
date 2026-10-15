@@ -39,7 +39,7 @@ export function Icon({ name, title, ...rest }: { name: IconName; title?: string 
       height="20"
       fill="none"
       stroke="currentColor"
-      strokeWidth="1.8"
+      strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden={title ? undefined : true}

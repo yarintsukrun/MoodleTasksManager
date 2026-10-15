@@ -1,0 +1,149 @@
+/*
+ * Settings — a plain printed settings sheet. Sections are a display-font heading + hairline rule;
+ * on wide screens the heading sits in a margin column beside its rows. Tokens per docs/DESIGN.md.
+ */
+.sheet {
+  --sheet-ink: var(--ink, var(--text));
+  --sheet-rule: var(--rule, var(--border));
+  --sheet-accent: var(--accent, var(--danger));
+  --sheet-display: var(--font-display, 'Frank Ruhl Libre', 'David', Georgia, serif);
+  max-inline-size: 860px;
+  padding-block-start: var(--space-2);
+}
+
+.sheet__head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding-block-end: var(--space-6);
+  border-block-end: 2px solid var(--sheet-ink);
+}
+.sheet__title {
+  font-family: var(--sheet-display);
+  font-size: clamp(1.75rem, 1.3rem + 1.8vw, 2.5rem);
+  font-weight: 600;
+  line-height: 1.15;
+  color: var(--sheet-ink);
+}
+.sheet__lead {
+  color: var(--text-muted);
+}
+
+/* Section: heading + body; heading moves to the margin column on wide screens */
+.sheet__sec {
+  display: grid;
+  gap: var(--space-3);
+  padding-block: var(--space-6);
+  border-block-end: 1px solid var(--sheet-rule);
+}
+.sheet__sec:last-child {
+  border-block-end: 0;
+}
+@media (min-width: 900px) {
+  .sheet__sec {
+    grid-template-columns: 10rem minmax(0, 1fr);
+    column-gap: var(--space-8);
+    padding-block: var(--space-8);
+  }
+}
+.sheet__h2 {
+  font-family: var(--sheet-display);
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--sheet-ink);
+}
+@media (min-width: 900px) {
+  .sheet__h2 {
+    /* Optically align the heading with the first text line of the body. */
+    padding-block-start: 2px;
+  }
+}
+.sheet__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-inline-size: 0;
+}
+
+/* Row: label (+ hint) at inline-start, control at inline-end */
+.sheet__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3) var(--space-6);
+}
+.sheet__label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1 1 14rem;
+  min-inline-size: 0;
+  font-weight: 600;
+  color: var(--sheet-ink);
+}
+.sheet__hint {
+  font-size: var(--fs-sm);
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--text-muted);
+  text-wrap: pretty;
+}
+.sheet__intro {
+  margin-block-end: calc(-1 * var(--space-2));
+}
+.sheet__segmented {
+  flex: 0 1 20rem;
+  min-inline-size: min(100%, 17rem);
+}
+.sheet__btn {
+  flex-shrink: 0;
+}
+
+/* Destructive: set apart by space, a dashed rule and a red-pen margin mark */
+.sheet__danger {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-block-start: var(--space-4);
+  padding-block-start: var(--space-5);
+  border-block-start: 1px dashed var(--sheet-rule);
+}
+.sheet__danger > .sheet__row > .sheet__label {
+  padding-inline-start: var(--space-3);
+  border-inline-start: 2px solid var(--sheet-accent);
+}
+.sheet__danger > .sheet__row > .sheet__label > span:first-child {
+  color: var(--sheet-accent);
+}
+.sheet__confirm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: 1px solid var(--sheet-accent);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+.sheet__confirm-title {
+  font-family: var(--sheet-display);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--sheet-accent);
+}
+.sheet__confirm-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-block-start: var(--space-2);
+}
+
+.sheet__prose {
+  gap: var(--space-2);
+  max-inline-size: 38rem;
+}
+.sheet__prose p {
+  line-height: 1.6;
+  text-wrap: pretty;
+}

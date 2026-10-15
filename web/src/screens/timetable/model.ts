@@ -87,15 +87,15 @@ export function buildWeek(events: MoodleEvent[], sunday: number, today: number):
     }
   }
 
-  // Quiz windows: dashed band on every day between open and close, only when both fall in this week.
+  // Quiz windows: hatched band on every day of this week between open and close (clipped to the week).
   for (const [k, open] of quizOpen) {
     const close = quizClose.get(k);
     if (!close || close.start <= open.start) continue;
     const closeAt = effectiveDue(close.start);
     const d0 = dayNum(open.start);
     const d1 = dayNum(closeAt);
-    if (!inWeek(d0) || !inWeek(d1)) continue;
-    for (let d = d0; d <= d1; d++) {
+    if (d1 < sunday || d0 >= sunday + 7) continue;
+    for (let d = Math.max(d0, sunday); d <= Math.min(d1, sunday + 6); d++) {
       cols[d - sunday]!.bands.push({
         key: `${k}|${d}`,
         courseId: open.courseId,

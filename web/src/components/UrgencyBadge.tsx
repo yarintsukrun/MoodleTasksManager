@@ -21,7 +21,7 @@ const DEFAULT_TONE: Record<Urgency, Tone> = {
 };
 const TONE_ICON: Record<Tone, IconName> = { danger: 'alert', warning: 'clock', success: 'check', neutral: 'clock' };
 
-/** Urgency pill (text + icon + color). `tone` overrides the default color (e.g. from deadlineTone()); `label` overrides the text. */
+/** Urgency mark: small plain text + line icon in the tone's ink (no pill). `tone` overrides the default color (e.g. from deadlineTone()); `label` overrides the text. */
 export function UrgencyBadge({ urgency, tone, label }: { urgency: Urgency; tone?: Tone; label?: string }) {
   const t = tone ?? DEFAULT_TONE[urgency];
   return (

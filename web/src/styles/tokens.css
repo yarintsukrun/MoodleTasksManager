@@ -1,60 +1,80 @@
 /*
- * Design tokens. Light is the default; dark applies via prefers-color-scheme unless
- * <html data-theme="light"> is set, or always with <html data-theme="dark">.
+ * Design tokens — "יומן הסטודנט" (a printed academic planner). See docs/DESIGN.md.
+ * Light is the default; dark applies via prefers-color-scheme unless <html data-theme="light">,
+ * or always with <html data-theme="dark">.
  *
- * Course colors: --course-0 … --course-7 are "ink" colors with ≥4.5:1 contrast on --surface,
- * --bg, --surface-2 and their own 14% tint in their theme (usable for text, dots, borders).
- * --course-N-soft is a tint for backgrounds; put --text on top of it. Never convey meaning by color alone.
+ * Paper & ink: --paper (= --bg) is the page, --surface is a sheet on it, --ink (= --text) is the pen.
+ * One accent (--accent = --primary): a red pen for "now", overdue and the primary action. Use sparingly.
+ * Rules: --rule for 1px section/row dividers, --grid-line for timetable ruled lines.
+ *
+ * Course colours: --course-0 … --course-7 are muted inks with ≥4.5:1 contrast on --paper, --surface,
+ * --surface-2 and their own -soft tint (usable as text, dot, side stripe, underline).
+ * --course-N-soft is a highlighter tint for backgrounds; put --ink on top. Never a saturated block
+ * with white text, and never convey meaning by colour alone.
  */
 :root {
   color-scheme: light;
 
-  /* Surfaces & text */
-  --bg: #f6f7fb;
-  --surface: #ffffff;
-  --surface-2: #eef0f6;
-  --surface-3: #e2e6ef;
-  --border: #d5dae5;
-  --border-strong: #7d8699; /* 3.7:1 on surface: input/checkbox/ring boundaries (WCAG 1.4.11) */
-  --text: #161a23;
-  --text-muted: #4f5869; /* 7.0:1 on surface */
-  --text-subtle: #5d6779; /* 5.7:1 on surface, 5.0:1 on surface-2 */
-  --overlay: rgb(15 18 26 / 0.45);
+  /* Paper & ink */
+  --paper: #f7f4ee;
+  --surface: #fffdf9;
+  --surface-2: #efeae0; /* inset areas, hover rows */
+  --surface-3: #e6dfd1;
+  --ink: #1f1d1a;
+  --ink-soft: #3a3631;
+  --rule: #ddd6c8;
+  --rule-strong: #c9c0ae;
+  --grid-line: #ece6da;
+  --accent: #b3261e;
 
-  /* Brand / interactive */
-  --primary: #3b5bdb;
-  --primary-hover: #2f4bc0;
-  --primary-soft: #e6ebfd;
+  /* Legacy names (screens use these) mapped onto paper & ink */
+  --bg: var(--paper);
+  --text: var(--ink);
+  --border: var(--rule);
+  --border-strong: #857d6e; /* 4.0:1 on surface, 3.4:1 on surface-2: input/checkbox boundaries (WCAG 1.4.11) */
+  --text-muted: #5b574f; /* 6.6:1 on paper */
+  --text-subtle: #625d55; /* 6.0:1 on paper, 5.5:1 on surface-2 */
+  --overlay: rgb(31 29 26 / 0.42);
+
+  /* Interactive: the red pen */
+  --primary: var(--accent);
+  --primary-hover: #8f1e18;
+  --primary-soft: #f6e4df;
+  --accent-soft: var(--primary-soft);
   --on-primary: #ffffff;
-  --focus-ring: #3b5bdb;
+  --focus-ring: var(--accent);
+  /* Solid red-pen fill for primary buttons (in dark it is deeper than --accent so it doesn't glare). */
+  --accent-fill: var(--accent); /* white on it 6.5:1 */
+  --accent-fill-hover: #8f1e18; /* 8.9:1 */
+  --on-accent-fill: #ffffff;
 
-  /* Urgency (always paired with text + icon) */
-  --danger: #c4231b;
-  --danger-soft: #fde8e6;
-  --warning: #9a5800;
-  --warning-soft: #fff1d6;
-  --success: #147437;
-  --success-soft: #e2f5e8;
-  --neutral: #4f5869;
-  --neutral-soft: #eef0f6;
+  /* Urgency (always paired with text + mark). Danger is the accent. */
+  --danger: #b3261e;
+  --danger-soft: #f6e4df;
+  --warning: #855a06;
+  --warning-soft: #f4ead2;
+  --success: #3b6a3f;
+  --success-soft: #e4ecdf;
+  --neutral: #5b574f;
+  --neutral-soft: #efeae0;
 
-  /* Event-type accents */
-  --type-assignment: #3b5bdb;
-  --type-quiz: #993abd;
-  --type-class: #0f726b;
-  --type-online: #0b69a6;
-  --type-other: #5f6878;
+  /* Event-type inks (icons carry the shape; colour is secondary) */
+  --type-assignment: #2f4f73;
+  --type-quiz: #7a3e6b;
+  --type-class: #3f6b4f;
+  --type-online: #2f6173;
+  --type-other: #5b574f;
 
-  /* Course palette (light) */
-  --course-0: #1d4ed8; /* blue    6.7:1 */
-  --course-1: #047454; /* emerald 5.8:1 */
-  --course-2: #6d28d9; /* violet  7.1:1 */
-  --course-3: #b63d0c; /* orange  5.7:1 */
-  --course-4: #be185d; /* pink    6.0:1 */
-  --course-5: #0e6e88; /* cyan    5.8:1 */
-  --course-6: #925907; /* amber   5.8:1 */
-  --course-7: #47710f; /* lime    5.8:1 */
-  --course-none: #5f6878;
+  /* Course palette — muted inks (contrast on paper / surface) */
+  --course-0: #2f6f73; /* teal        5.3 / 5.7 */
+  --course-1: #8a5f0f; /* ochre       5.1 / 5.6 */
+  --course-2: #56632a; /* olive       6.0 / 6.4 */
+  --course-3: #7a3e6b; /* plum        7.0 / 7.6 */
+  --course-4: #3e5c8a; /* slate-blue  6.2 / 6.7 */
+  --course-5: #9c4a2f; /* brick       5.6 / 6.0 */
+  --course-6: #3f6b4f; /* moss        5.6 / 6.0 */
+  --course-7: #55555f; /* graphite    6.7 / 7.3 */
+  --course-none: #6a655c;
 
   /* Spacing (4px base) */
   --space-1: 4px;
@@ -65,137 +85,156 @@
   --space-6: 24px;
   --space-8: 32px;
   --space-10: 40px;
+  --space-12: 48px;
 
-  /* Radius */
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 16px;
+  /* Radius: small, deliberate. Pill is only for filter chips. */
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
   --radius-pill: 999px;
 
-  /* Shadows */
-  --shadow-1: 0 1px 2px rgb(16 24 40 / 0.06), 0 1px 3px rgb(16 24 40 / 0.08);
-  --shadow-2: 0 4px 12px rgb(16 24 40 / 0.1);
-  --shadow-3: 0 12px 32px rgb(16 24 40 / 0.18);
+  /* Shadows: only floating layers (popover, drawer, toast). Cards are flat. */
+  --shadow-1: 0 0 #0000;
+  --shadow-2: 0 2px 4px rgb(31 29 26 / 0.06), 0 6px 16px rgb(31 29 26 / 0.1);
+  --shadow-3: 0 1px 2px rgb(31 29 26 / 0.08), 0 16px 40px rgb(31 29 26 / 0.18);
 
   /* Typography */
-  --font: 'Heebo', 'Assistant', system-ui, -apple-system, 'Segoe UI', Arial, sans-serif;
+  --font-display: 'Frank Ruhl Libre', 'David Libre', 'Times New Roman', serif;
+  --font-body: 'Assistant', system-ui, -apple-system, 'Segoe UI', Arial, sans-serif;
+  --font: var(--font-body);
+  /* Scale 12 / 14 / 16 / 20 / 28 / 40 */
   --fs-xs: 0.75rem;
   --fs-sm: 0.875rem;
   --fs-md: 1rem;
-  --fs-lg: 1.125rem;
-  --fs-xl: 1.375rem;
-  --fs-2xl: 1.75rem;
+  --fs-lg: 1.25rem;
+  --fs-xl: 1.75rem;
+  --fs-2xl: 2.5rem;
+  --fs-12: var(--fs-xs);
+  --fs-14: var(--fs-sm);
+  --fs-16: var(--fs-md);
+  --fs-20: var(--fs-lg);
+  --fs-28: var(--fs-xl);
+  --fs-40: var(--fs-2xl);
+  --lh-body: 1.5;
+  --lh-tight: 1.15;
 
-  /* Layout & motion */
+  /* Layout & motion (≤150ms, state changes only) */
   --touch: 44px;
-  --nav-h: 64px;
-  --sidebar-w: 232px;
+  --nav-h: 60px;
+  --sidebar-w: 216px;
   --content-max: 1080px;
-  --dur: 180ms;
-  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --dur: 120ms;
+  --ease: cubic-bezier(0.2, 0, 0, 1);
 }
 
-/* Course tints (derived, theme-aware via color-mix) */
+/* Highlighter tints (derived, theme-aware via color-mix) */
 :root {
-  --course-0-soft: color-mix(in srgb, var(--course-0) 14%, var(--surface));
-  --course-1-soft: color-mix(in srgb, var(--course-1) 14%, var(--surface));
-  --course-2-soft: color-mix(in srgb, var(--course-2) 14%, var(--surface));
-  --course-3-soft: color-mix(in srgb, var(--course-3) 14%, var(--surface));
-  --course-4-soft: color-mix(in srgb, var(--course-4) 14%, var(--surface));
-  --course-5-soft: color-mix(in srgb, var(--course-5) 14%, var(--surface));
-  --course-6-soft: color-mix(in srgb, var(--course-6) 14%, var(--surface));
-  --course-7-soft: color-mix(in srgb, var(--course-7) 14%, var(--surface));
-  --course-none-soft: color-mix(in srgb, var(--course-none) 14%, var(--surface));
+  --course-0-soft: color-mix(in srgb, var(--course-0) 13%, var(--surface));
+  --course-1-soft: color-mix(in srgb, var(--course-1) 13%, var(--surface));
+  --course-2-soft: color-mix(in srgb, var(--course-2) 13%, var(--surface));
+  --course-3-soft: color-mix(in srgb, var(--course-3) 13%, var(--surface));
+  --course-4-soft: color-mix(in srgb, var(--course-4) 13%, var(--surface));
+  --course-5-soft: color-mix(in srgb, var(--course-5) 13%, var(--surface));
+  --course-6-soft: color-mix(in srgb, var(--course-6) 13%, var(--surface));
+  --course-7-soft: color-mix(in srgb, var(--course-7) 13%, var(--surface));
+  --course-none-soft: color-mix(in srgb, var(--course-none) 13%, var(--surface));
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
     color-scheme: dark;
-    --bg: #12141a;
-    --surface: #1a1d25;
-    --surface-2: #232733;
-    --surface-3: #2d3240;
-    --border: #353b4a;
-    --border-strong: #545c70;
-    --text: #eceef4;
-    --text-muted: #b3bac8;
-    --text-subtle: #959db0;
+    --paper: #16150f;
+    --surface: #1e1d17;
+    --surface-2: #26251e;
+    --surface-3: #302e26;
+    --ink: #ece8df;
+    --ink-soft: #d6d1c6;
+    --rule: #3a372e;
+    --rule-strong: #4a463b;
+    --grid-line: #2a2822;
+    --accent: #f2766b;
+    --border-strong: #7a7465;
+    --text-muted: #b4aea2;
+    --text-subtle: #a9a397;
     --overlay: rgb(0 0 0 / 0.6);
-    --primary: #8aa2ff;
-    --primary-hover: #a5b8ff;
-    --primary-soft: #252d4d;
-    --on-primary: #10131c;
-    --focus-ring: #8aa2ff;
-    --danger: #ff7b72;
-    --danger-soft: #3d1c1c;
-    --warning: #f0b34a;
-    --warning-soft: #3a2c12;
-    --success: #5ad48a;
-    --success-soft: #16301f;
-    --neutral: #b3bac8;
-    --neutral-soft: #232733;
-    --type-assignment: #8aa2ff;
-    --type-quiz: #d79cf0;
-    --type-class: #4fd1c0;
-    --type-online: #6cc3f5;
-    --type-other: #a3abbb;
-    --course-0: #7aa2ff;
-    --course-1: #34d399;
-    --course-2: #b69cff;
-    --course-3: #fb923c;
-    --course-4: #f472b6;
-    --course-5: #22d3ee;
-    --course-6: #facc15;
-    --course-7: #a3e635;
-    --course-none: #a3abbb;
-    --shadow-1: 0 1px 2px rgb(0 0 0 / 0.4);
-    --shadow-2: 0 4px 12px rgb(0 0 0 / 0.45);
-    --shadow-3: 0 12px 32px rgb(0 0 0 / 0.6);
+    --primary-hover: #f6958c;
+    --primary-soft: #3a201c;
+    --on-primary: #1a0d0b;
+    --accent-fill: #c0392f; /* white on it 5.4:1 */
+    --accent-fill-hover: #cb4236; /* 4.8:1 */
+    --danger: #f2766b;
+    --danger-soft: #3a201c;
+    --warning: #e0b25a;
+    --warning-soft: #352a14;
+    --success: #8fc49a;
+    --success-soft: #1f2c20;
+    --neutral: #b4aea2;
+    --neutral-soft: #26251e;
+    --type-assignment: #9db5e0;
+    --type-quiz: #d59bc6;
+    --type-class: #8fc4a0;
+    --type-online: #85bfcf;
+    --type-other: #b4aea2;
+    --course-0: #7fc1c4;
+    --course-1: #e0b25a;
+    --course-2: #b5c27a;
+    --course-3: #d59bc6;
+    --course-4: #9db5e0;
+    --course-5: #e79a7e;
+    --course-6: #8fc4a0;
+    --course-7: #b4b4be;
+    --course-none: #a9a397;
+    --shadow-2: 0 2px 4px rgb(0 0 0 / 0.3), 0 6px 16px rgb(0 0 0 / 0.4);
+    --shadow-3: 0 1px 2px rgb(0 0 0 / 0.4), 0 16px 40px rgb(0 0 0 / 0.55);
   }
 }
 
 :root[data-theme='dark'] {
   color-scheme: dark;
-  --bg: #12141a;
-  --surface: #1a1d25;
-  --surface-2: #232733;
-  --surface-3: #2d3240;
-  --border: #353b4a;
-  --border-strong: #545c70;
-  --text: #eceef4;
-  --text-muted: #b3bac8;
-  --text-subtle: #959db0;
+  --paper: #16150f;
+  --surface: #1e1d17;
+  --surface-2: #26251e;
+  --surface-3: #302e26;
+  --ink: #ece8df;
+  --ink-soft: #d6d1c6;
+  --rule: #3a372e;
+  --rule-strong: #4a463b;
+  --grid-line: #2a2822;
+  --accent: #f2766b;
+  --border-strong: #7a7465;
+  --text-muted: #b4aea2;
+  --text-subtle: #a9a397;
   --overlay: rgb(0 0 0 / 0.6);
-  --primary: #8aa2ff;
-  --primary-hover: #a5b8ff;
-  --primary-soft: #252d4d;
-  --on-primary: #10131c;
-  --focus-ring: #8aa2ff;
-  --danger: #ff7b72;
-  --danger-soft: #3d1c1c;
-  --warning: #f0b34a;
-  --warning-soft: #3a2c12;
-  --success: #5ad48a;
-  --success-soft: #16301f;
-  --neutral: #b3bac8;
-  --neutral-soft: #232733;
-  --type-assignment: #8aa2ff;
-  --type-quiz: #d79cf0;
-  --type-class: #4fd1c0;
-  --type-online: #6cc3f5;
-  --type-other: #a3abbb;
-  --course-0: #7aa2ff;
-  --course-1: #34d399;
-  --course-2: #b69cff;
-  --course-3: #fb923c;
-  --course-4: #f472b6;
-  --course-5: #22d3ee;
-  --course-6: #facc15;
-  --course-7: #a3e635;
-  --course-none: #a3abbb;
-  --shadow-1: 0 1px 2px rgb(0 0 0 / 0.4);
-  --shadow-2: 0 4px 12px rgb(0 0 0 / 0.45);
-  --shadow-3: 0 12px 32px rgb(0 0 0 / 0.6);
+  --primary-hover: #f6958c;
+  --primary-soft: #3a201c;
+  --on-primary: #1a0d0b;
+  --accent-fill: #c0392f;
+  --accent-fill-hover: #cb4236;
+  --danger: #f2766b;
+  --danger-soft: #3a201c;
+  --warning: #e0b25a;
+  --warning-soft: #352a14;
+  --success: #8fc49a;
+  --success-soft: #1f2c20;
+  --neutral: #b4aea2;
+  --neutral-soft: #26251e;
+  --type-assignment: #9db5e0;
+  --type-quiz: #d59bc6;
+  --type-class: #8fc4a0;
+  --type-online: #85bfcf;
+  --type-other: #b4aea2;
+  --course-0: #7fc1c4;
+  --course-1: #e0b25a;
+  --course-2: #b5c27a;
+  --course-3: #d59bc6;
+  --course-4: #9db5e0;
+  --course-5: #e79a7e;
+  --course-6: #8fc4a0;
+  --course-7: #b4b4be;
+  --course-none: #a9a397;
+  --shadow-2: 0 2px 4px rgb(0 0 0 / 0.3), 0 6px 16px rgb(0 0 0 / 0.4);
+  --shadow-3: 0 1px 2px rgb(0 0 0 / 0.4), 0 16px 40px rgb(0 0 0 / 0.55);
 }
 
 @media (prefers-reduced-motion: reduce) {

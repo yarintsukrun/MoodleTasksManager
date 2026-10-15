@@ -2,11 +2,11 @@ import { useEffect, useMemo, useRef, useState, type TouchEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { deriveWeeklySlots, type MoodleEvent, type WeeklySlot } from '@mtm/core';
 import { Chip, EmptyState, EventDrawer, PageHeader } from '../../components';
-import { useCourses, useNow, useStore, useVisibleEvents, weekdayShort } from '../../data';
+import { useCourses, useNow, useStore, useVisibleEvents } from '../../data';
 import { Agenda } from './Agenda';
-import { dayLabel, dayNum, dayWeekday, minuteOf, rangeLabel, sundayOf } from './dates';
+import { dayNum, dayWeekday, minuteOf, rangeLabel, sundayOf } from './dates';
 import { buildRegular, buildWeek, visibleColumns, type GridModel } from './model';
-import { WeekGrid } from './WeekGrid';
+import { DateStub, GridLegend, WeekGrid, dayName } from './WeekGrid';
 import './timetable.css';
 
 type Mode = 'week' | 'regular';
@@ -38,6 +38,13 @@ function useMediaQuery(query: string) {
 const Chevron = ({ to }: { to: 'start' | 'end' }) => (
   <svg className="tt-chev" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d={to === 'start' ? 'M9 6l6 6-6 6' : 'M15 6l-6 6 6 6'} />
+  </svg>
+);
+
+const CalendarIcon = () => (
+  <svg viewBox="0 0 24 24" width="32" height="32" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+    <rect x="3.5" y="5" width="17" height="15" rx="1.5" />
+    <path d="M3.5 9.5h17M8 3v4M16 3v4M8 13h2M12 13h2M8 16.5h2" />
   </svg>
 );
 
@@ -86,7 +93,7 @@ export default function TimetableScreen() {
       <>
         <PageHeader title="מערכת שעות" />
         <EmptyState
-          icon="🗓️"
+          icon={<CalendarIcon />}
           title={events.length === 0 ? 'עדיין אין נתונים' : 'לא נמצאו מפגשי שיעור'}
           action={
             <Link to="/import" className="btn btn--primary">
@@ -201,10 +208,13 @@ export default function TimetableScreen() {
         </div>
       )}
 
-      {weekEmpty && <p className="note">אין מפגשים או הגשות בשבוע הזה.</p>}
+      {weekEmpty && <p className="tt-empty-week">אין מפגשים או הגשות בשבוע הזה.</p>}
 
       {desktop ? (
-        <WeekGrid model={model} columns={columns} colors={colors} nowMinute={nowMinute} onOpen={setOpenId} />
+        <div className="tt-sheet">
+          <WeekGrid model={model} columns={columns} colors={colors} nowMinute={nowMinute} onOpen={setOpenId} />
+          <GridLegend datesOnly={mode === 'week'} />
+        </div>
       ) : (
         <div className="tt-mobile" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
           <div className="tt-daybar">
@@ -223,11 +233,11 @@ export default function TimetableScreen() {
                       type="button"
                       role="tab"
                       aria-selected={w === mobileDay}
+                      aria-label={`${dayName(col)}${col.isToday ? ', היום' : ''}`}
                       className={`tt-daytab${col.isToday ? ' is-today' : ''}`}
                       onClick={() => setMobileDay(w)}
                     >
-                      <span>{weekdayShort(w)}</span>
-                      {col.day !== undefined && <span className="num tt-daytab__date">{dayLabel(col.day)}</span>}
+                      <DateStub col={col} compact />
                     </button>
                   );
                 })}

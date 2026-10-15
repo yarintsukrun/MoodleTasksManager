@@ -1,303 +1,614 @@
-/* Tasks screen. Mobile-first; ≥900px adds a sticky summary column. */
+/*
+ * Tasks — a ruled to-do page in a planner.
+ * Rows sit on hairline rules (no cards); group headings are small display-type with a darker rule;
+ * ≥900px adds a narrow margin column with the tallies, like notes written in the margin.
+ */
+.tasks {
+  --t-ink: var(--ink, var(--text));
+  --t-rule: var(--rule, var(--border));
+  --t-accent: var(--accent, var(--danger));
+  --t-display: var(--font-display, 'Frank Ruhl Libre', Georgia, serif);
+  --t-row-pad: 12px;
+  --t-due-w: 6.75rem;
+}
+
+.tasks__tally-late {
+  color: var(--t-accent);
+  font-weight: 600;
+}
+
 .tasks__layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: var(--space-6);
 }
-.tasks__aside {
+.tasks__main {
+  min-inline-size: 0;
+}
+.tasks__margin {
   display: none;
 }
 
-/* Filters */
+/* ---------- Filter bar ---------- */
 .tasks__filters {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  padding: var(--space-3);
+  margin-block-end: var(--space-6);
 }
-.tasks__search {
-  inline-size: 100%;
-}
-.tasks__filter-foot {
-  justify-content: space-between;
-}
-
-/* Groups */
-.tasks__group {
+.tasks__filter-line {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: var(--space-1);
 }
-.tasks__group-head {
+.tasks__search {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: var(--space-2);
-  font-size: var(--fs-md);
-  font-weight: 700;
+  flex: 1;
+  min-inline-size: 0;
+  border-block-end: 1px solid var(--text-muted);
+  transition: border-color 120ms ease-out;
 }
-.tasks__group--overdue .tasks__group-head {
-  color: var(--danger);
+.tasks__search:focus-within {
+  border-block-end-color: var(--t-ink);
+  box-shadow: 0 1px 0 var(--t-ink);
 }
-.tasks__count {
-  display: inline-grid;
-  place-items: center;
-  min-inline-size: 24px;
+.tasks__search-icon {
+  flex: none;
+  inline-size: 18px;
+  block-size: 18px;
+  margin-inline-end: var(--space-2);
+  fill: none;
+  stroke: var(--text-muted);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+.tasks__search-input {
+  flex: 1;
+  min-inline-size: 0;
+  min-block-size: var(--touch);
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--t-ink);
+  font: inherit;
+  font-size: 1rem;
+}
+.tasks__search-input::placeholder {
+  color: var(--text-muted);
+  opacity: 1;
+}
+.tasks__search-input:focus,
+.tasks__search-input:focus-visible {
+  outline: none; /* the underline thickens instead (see :focus-within) */
+}
+
+/* Type filter: a text segmented control — words, not pills. */
+.tasks__types {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  margin-inline: calc(-1 * var(--space-2));
+}
+.tasks__type {
+  position: relative;
+  min-block-size: var(--touch);
   padding-inline: var(--space-2);
-  border-radius: var(--radius-pill);
-  background: var(--surface-3);
-  color: var(--text);
-  font-size: var(--fs-xs);
-  font-weight: 700;
-  line-height: 1.7;
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
 }
-.tasks__group-toggle {
+.tasks__type + .tasks__type::before {
+  content: '';
+  position: absolute;
+  inset-inline-start: 0;
+  inset-block: 15px;
+  border-inline-start: 1px solid var(--t-rule);
+}
+.tasks__type:hover {
+  color: var(--t-ink);
+}
+.tasks__type[aria-pressed='true'] {
+  color: var(--t-ink);
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 7px;
+}
+
+.tasks__courses {
+  margin-inline: calc(-1 * var(--space-4));
+  padding-inline: var(--space-4);
+}
+
+.tasks__filter-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  column-gap: var(--space-4);
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+.tasks__switch input {
+  inline-size: 18px;
+  block-size: 18px;
+  accent-color: var(--t-ink);
+}
+.tasks__filter-status {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
+}
+.tasks__text-btn {
   min-block-size: var(--touch);
   padding-inline: var(--space-2);
-  margin-inline-start: calc(-1 * var(--space-2));
   border: 0;
-  border-radius: var(--radius-md);
   background: transparent;
-  font-weight: inherit;
+  color: var(--t-ink);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: var(--text-muted);
+  text-underline-offset: 4px;
+  cursor: pointer;
 }
-.tasks__group-toggle:hover {
-  background: var(--surface-2);
-}
-/* Chevron (RTL app): points to inline-end (left) when collapsed, down when expanded. */
-.tasks__chevron {
-  inline-size: 8px;
-  block-size: 8px;
-  border-block-end: 2px solid currentColor;
-  border-inline-end: 2px solid currentColor;
-  transform: rotate(45deg);
-  transition: transform var(--dur) var(--ease);
-}
-.tasks__group-toggle[aria-expanded='true'] .tasks__chevron {
-  transform: rotate(-45deg);
+.tasks__text-btn:hover {
+  text-decoration-color: currentColor;
 }
 
-/* Rows */
-.tasks__list {
-  display: flex;
-  flex-direction: column;
+.tasks__none {
+  padding-block: var(--space-6);
+  border-block: 1px solid var(--t-rule);
+  color: var(--text-muted);
+}
+.tasks__none p {
   margin: 0;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
+}
+
+/* ---------- Groups ---------- */
+.tasks__group + .tasks__group {
+  margin-block-start: var(--space-8);
+}
+.tasks__group-head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin: 0;
+  padding-block-end: 6px;
+  border-block-end: 1px solid var(--t-ink);
+  font-family: var(--t-display);
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--t-ink);
+}
+.tasks__count {
+  font-family: var(--font-body, var(--font));
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+.tasks__group-date {
+  margin-inline-start: auto;
+  font-family: var(--font-body, var(--font));
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+/* Overdue: the red pen — heading, count and rule. */
+.tasks__group--overdue .tasks__group-head {
+  color: var(--t-accent);
+  border-block-end-color: var(--t-accent);
+}
+.tasks__group--overdue .tasks__count {
+  color: var(--t-accent);
+}
+/* Done: quieter heading, collapsible. */
+.tasks__group--done .tasks__group-head {
+  border-block-end-color: var(--t-rule);
+  color: var(--text-muted);
+}
+.tasks__group-toggle {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  inline-size: 100%;
+  min-block-size: var(--touch);
+  padding: 0;
+  padding-block-start: 10px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+.tasks__group-toggle:hover .tasks__group-name {
+  color: var(--t-ink);
+}
+.tasks__group-hint {
+  margin-inline-start: auto;
+  font-family: var(--font-body, var(--font));
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--t-ink);
+  text-decoration: underline;
+  text-decoration-color: var(--text-muted);
+  text-underline-offset: 4px;
+}
+/* Chevron (RTL): points to inline-end when collapsed, down when expanded. */
+.tasks__chevron {
+  align-self: center;
+  inline-size: 7px;
+  block-size: 7px;
+  margin-inline: 2px 4px;
+  border-block-end: 1.5px solid currentColor;
+  border-inline-end: 1.5px solid currentColor;
+  transform: rotate(45deg);
+  transition: transform 120ms ease-out;
+}
+.tasks__group-toggle[aria-expanded='true'] .tasks__chevron {
+  transform: rotate(-45deg) translate(-1px, -1px);
+}
+
+/* ---------- Rows ---------- */
+.tasks__list {
+  margin: 0;
+  padding: 0;
 }
 .task-row {
   display: flex;
-  align-items: center;
-  gap: var(--space-1);
-  padding-inline-start: var(--space-1);
-  border-block-end: 1px solid var(--border);
+  align-items: flex-start;
+  border-block-end: 1px solid var(--t-rule);
 }
 .task-row:last-child {
   border-block-end: 0;
 }
+.task-row .status-toggle {
+  /* centre the 26px box on the title's first line */
+  margin-block-start: calc(var(--t-row-pad) + 0.68rem - 22px);
+  margin-inline-start: -10px;
+}
 .task-row__spacer {
   flex: none;
-  inline-size: var(--touch);
+  inline-size: calc(var(--touch) - 10px);
 }
 .task-row__main {
   flex: 1;
   min-inline-size: 0;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--space-3);
   min-block-size: 64px;
-  padding: var(--space-2) var(--space-3);
-  padding-inline-start: var(--space-1);
+  padding-block: var(--t-row-pad);
+  padding-inline: var(--space-1) 0;
   border: 0;
   background: transparent;
+  color: inherit;
+  font: inherit;
   text-align: start;
-}
-.task-row__main:hover {
-  background: var(--surface-2);
+  cursor: pointer;
 }
 .task-row__main:focus-visible {
-  outline-offset: -3px;
+  outline-offset: -2px;
+}
+.task-row:hover {
+  background: color-mix(in srgb, var(--t-ink) 3.5%, transparent);
 }
 .task-row__body {
   flex: 1;
   min-inline-size: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: 3px;
 }
 .task-row__title {
+  font-size: 1rem;
   font-weight: 600;
+  line-height: 1.35;
+  color: var(--t-ink);
   overflow-wrap: anywhere;
-}
-.task-row__tag {
-  margin-inline-end: var(--space-1);
-  padding: 0 var(--space-1);
-  border-radius: var(--radius-sm);
-  background: var(--surface-3);
-  font-size: var(--fs-xs);
-  font-weight: 700;
+  text-decoration-line: line-through;
+  text-decoration-color: transparent;
+  text-decoration-thickness: 1.5px;
 }
 .task-row__meta {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   flex-wrap: wrap;
-  gap: var(--space-2);
+  column-gap: var(--space-2);
   min-inline-size: 0;
-}
-.task-row__estimate {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  padding: 1px var(--space-2);
-  border-radius: var(--radius-pill);
-  background: var(--surface-2);
+  font-size: 0.875rem;
+  line-height: 1.4;
   color: var(--text-muted);
-  font-size: var(--fs-xs);
-  font-weight: 600;
 }
-/* Quiz/lab open window on the closing row. Dot shape differs open (filled) vs not yet (ring). */
-.task-row__window {
+.task-row__course {
   display: inline-flex;
-  align-items: center;
-  gap: var(--space-1);
-  padding: 1px var(--space-2);
-  border: 1px dashed var(--border-strong);
-  border-radius: var(--radius-pill);
-  color: var(--text-muted);
-  font-size: var(--fs-xs);
+  align-items: baseline;
+  gap: 6px;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+}
+.task-row__course .course-dot {
+  align-self: center;
+}
+.task-row__course-name {
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
-.task-row__window-dot {
-  inline-size: 8px;
-  block-size: 8px;
-  border: 2px solid currentColor;
-  border-radius: 50%;
+.task-row__type::before,
+.task-row__estimate::before {
+  content: '·';
+  margin-inline-end: var(--space-2);
 }
-.task-row__window--open {
-  border-style: solid;
-  border-color: color-mix(in srgb, var(--success) 45%, transparent);
-  background: var(--success-soft);
-  color: var(--text);
-}
-.task-row__window--open strong {
-  color: var(--success);
-}
-.task-row__window--open .task-row__window-dot {
-  border-color: var(--success);
-  background: var(--success);
-}
-.task-row__estimate svg {
-  inline-size: 12px;
-  block-size: 12px;
-}
-.task-row__when {
+
+/* Due column: date + time on one line, relative time beneath. Times share one edge, timetable-style. */
+.task-row__due {
   flex: none;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 2px;
+  gap: 1px;
+  min-inline-size: var(--t-due-w);
   text-align: end;
 }
-.task-row__abs {
-  color: var(--text-muted);
-  font-size: var(--fs-xs);
+.task-row__when {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  line-height: 1.35;
   white-space: nowrap;
 }
+.task-row__date {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+.task-row__time {
+  min-inline-size: 5ch;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--t-ink);
+  text-align: end;
+}
+.task-row__rel {
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.task-row__rel--late {
+  color: var(--t-accent);
+  font-weight: 600;
+}
+.tasks__group--today .task-row__rel {
+  color: var(--t-ink);
+  font-weight: 600;
+}
+
+/* Lab / quiz window: one quiet line. Open = filled mark, not yet = ring. */
+.task-row__window {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--text-muted);
+}
+.task-row__window-mark {
+  flex: none;
+  align-self: center;
+  inline-size: 6px;
+  block-size: 6px;
+  border: 1.25px solid currentColor;
+  border-radius: 50%;
+}
+.task-row__window--open {
+  color: var(--t-ink);
+}
+.task-row__window--open .task-row__window-mark {
+  background: currentColor;
+}
+
+/* Done: struck through in muted ink. */
 .task-row--done .task-row__title {
-  text-decoration: line-through;
+  color: var(--text-muted);
+  font-weight: 500;
+  text-decoration-color: currentColor;
+}
+.task-row--done .task-row__time {
   color: var(--text-muted);
   font-weight: 500;
 }
-.task-row--done .type-icon,
-.task-row--done .course-badge {
-  opacity: 0.7;
+.task-row--done .course-dot {
+  opacity: 0.55;
+}
+/* Just ticked, still in its old group for a beat: the strike draws in. */
+.task-row--settling .task-row__title {
+  animation: tasks-strike 150ms ease-out both;
+}
+@keyframes tasks-strike {
+  from {
+    text-decoration-color: transparent;
+    color: var(--t-ink);
+  }
 }
 
-/* Narrow phones: move the time block under the title. */
+/* Narrow phones: a slimmer due column; the row keeps its two-line rhythm. */
 @media (max-width: 420px) {
+  .tasks {
+    --t-due-w: 0;
+  }
   .task-row__main {
-    flex-wrap: wrap;
-    row-gap: var(--space-1);
+    gap: var(--space-2);
   }
   .task-row__when {
-    flex-basis: 100%;
-    flex-direction: row;
-    align-items: center;
-    gap: var(--space-2);
-    padding-inline-start: calc(32px + var(--space-3));
+    gap: 4px;
   }
 }
 
-/* Summary column */
-.tasks__summary-urgency {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-2);
-  margin: 0;
+/* ---------- Margin column ---------- */
+.tasks__margin-head {
+  margin: 0 0 var(--space-2);
+  font-family: var(--t-display);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--t-ink);
 }
-.tasks__summary-urgency > div {
-  display: flex;
-  flex-direction: column;
-  padding: var(--space-2);
-  border-radius: var(--radius-md);
-  background: var(--surface-2);
+.tasks__margin-head:not(:first-child) {
+  margin-block-start: var(--space-8);
 }
-.tasks__summary-urgency dt {
-  font-size: var(--fs-xs);
+.tasks__margin-note {
+  margin: var(--space-3) 0 0;
+  font-size: 0.75rem;
+  line-height: 1.5;
   color: var(--text-muted);
 }
-.tasks__summary-urgency dd {
+
+/* Dotted leaders, like a printed table of contents. */
+.tasks__leaders {
   margin: 0;
-  font-size: var(--fs-xl);
+  font-size: 0.875rem;
+}
+.tasks__leaders > div {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-1);
+  padding-block: 3px;
+}
+.tasks__leaders dt {
+  color: var(--t-ink);
+}
+.tasks__leaders > div::after {
+  content: '';
+  order: 1;
+  flex: 1;
+  border-block-end: 1px dotted var(--text-muted);
+  transform: translateY(-4px);
+}
+.tasks__leaders dd {
+  order: 2;
+  margin: 0;
+  min-inline-size: 2ch;
+  font-weight: 600;
+  text-align: end;
+  color: var(--t-ink);
+}
+.tasks__leaders .is-zero dt,
+.tasks__leaders .is-zero dd {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+.tasks__leaders .is-late dt,
+.tasks__leaders .is-late dd {
+  color: var(--t-accent);
   font-weight: 700;
 }
-.tasks__summary-courses {
+
+.tasks__by-course {
+  margin: 0;
+  padding: 0;
+}
+.tasks__by-course button {
   display: flex;
   flex-direction: column;
-  margin: 0;
-}
-.tasks__summary-courses button {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
+  justify-content: center;
+  gap: 5px;
   inline-size: 100%;
   min-block-size: var(--touch);
-  padding-inline: var(--space-2);
-  border: 1px solid transparent;
-  border-radius: var(--radius-md);
+  padding: 6px var(--space-2);
+  margin-inline: calc(-1 * var(--space-2));
+  box-sizing: content-box;
+  border: 0;
+  border-radius: var(--radius-sm);
   background: transparent;
+  color: var(--t-ink);
+  font: inherit;
+  font-size: 0.875rem;
   text-align: start;
+  cursor: pointer;
 }
-.tasks__summary-courses button:hover {
-  background: var(--surface-2);
+.tasks__by-course button:hover {
+  background: color-mix(in srgb, var(--t-ink) 4%, transparent);
 }
-.tasks__summary-courses button[aria-pressed='true'] {
-  background: var(--primary-soft);
-  border-color: var(--primary);
-  font-weight: 700;
+.tasks__by-course-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-inline-size: 0;
 }
-.tasks__summary-name {
+.tasks__by-course-name {
   flex: 1;
   min-inline-size: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.tasks__by-course-num {
+  font-weight: 600;
+}
+.tasks__by-course-of {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+.tasks__by-course-bar {
+  display: block;
+  block-size: 2px;
+  background: var(--t-rule);
+}
+.tasks__by-course-bar > span {
+  display: block;
+  block-size: 100%;
+  background: var(--c);
+}
+/* Selected course: a highlighter swipe behind the name. */
+.tasks__by-course button[aria-pressed='true'] .tasks__by-course-name {
+  font-weight: 700;
+  background: linear-gradient(transparent 45%, var(--t-mark) 45%, var(--t-mark) 92%, transparent 92%);
+  --t-mark: color-mix(in srgb, var(--c) 24%, transparent);
+}
+.tasks__by-course button[aria-pressed='true']::after {
+  content: 'מסונן';
+  align-self: flex-start;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-block-start: -3px;
+}
 
 @media (min-width: 900px) {
   .tasks__layout {
-    grid-template-columns: minmax(0, 1fr) 280px;
+    grid-template-columns: minmax(0, 1fr) 15rem;
+    column-gap: var(--space-10);
     align-items: start;
   }
-  .tasks__aside {
+  .tasks__margin {
     display: block;
     position: sticky;
     inset-block-start: var(--space-8);
+    padding-inline-start: var(--space-6);
+    border-inline-start: 1px solid var(--t-rule);
   }
-  .tasks__filters .chip-row {
-    flex-wrap: wrap;
+  /* The margin's course tally is the course filter on desktop. */
+  .tasks .tasks__courses {
+    display: none;
+  }
+  .tasks__filter-line {
+    flex-direction: row;
+    align-items: flex-end;
+    gap: var(--space-6);
+  }
+  .tasks__types {
+    flex-wrap: nowrap;
+    margin-inline-end: calc(-1 * var(--space-2));
+  }
+  .tasks {
+    --t-due-w: 8rem;
   }
 }

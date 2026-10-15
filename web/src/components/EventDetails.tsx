@@ -15,10 +15,10 @@ const upcomingUrlFor = (uid: string) => {
   return site ? `https://${site}/calendar/view.php?view=upcoming` : MOODLE_UPCOMING_URL;
 };
 
-const STATUSES: { value: TaskStatus; label: string; mark: string }[] = [
-  { value: 'todo', label: 'לא התחלתי', mark: '☐' },
-  { value: 'doing', label: 'בעבודה', mark: '◐' },
-  { value: 'done', label: 'הוגש', mark: '☑' },
+const STATUSES: { value: TaskStatus; label: string }[] = [
+  { value: 'todo', label: 'לא התחלתי' },
+  { value: 'doing', label: 'בעבודה' },
+  { value: 'done', label: 'הוגש' },
 ];
 
 /** Full details + editing (status, estimate, notes, type override) for one event. Render inside a Drawer. */
@@ -48,7 +48,7 @@ export function EventDetails({ event }: { event: MoodleEvent }) {
 
   return (
     <div className="details">
-      <div className="row">
+      <div className="details__lede">
         <TypeIcon type={event.type} withLabel />
         <CourseBadge courseId={event.courseId} name={event.courseName} />
       </div>
@@ -89,7 +89,7 @@ export function EventDetails({ event }: { event: MoodleEvent }) {
           <div className="segmented" role="group" aria-label="סטטוס המשימה">
             {STATUSES.map((s) => (
               <button key={s.value} type="button" aria-pressed={(state?.status ?? 'todo') === s.value} onClick={() => setTaskStatus(event.id, s.value)}>
-                <span aria-hidden="true">{s.mark}</span>
+                <span className={`seg-mark seg-mark--${s.value}`} aria-hidden="true" />
                 {s.label}
               </button>
             ))}

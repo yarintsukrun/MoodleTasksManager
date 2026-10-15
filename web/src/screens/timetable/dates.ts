@@ -16,6 +16,8 @@ export const sundayOf = (d: number) => d - dayWeekday(d);
 /** "YYYY-MM-DD" → day number. */
 export const keyToDay = (key: string) => Math.round(Date.parse(`${key}T00:00:00Z`) / DAY);
 
+/** Day of month, e.g. 15. */
+export const dayOfMonth = (d: number) => utc(d).getUTCDate();
 /** "15.10" */
 export const dayLabel = (d: number) => `${utc(d).getUTCDate()}.${utc(d).getUTCMonth() + 1}`;
 /** "יום ד׳ 15.10" */
