@@ -68,6 +68,7 @@
 .tt-block:focus-visible { z-index: 5; }
 .tt-block__title { display: flex; align-items: center; gap: var(--space-1); font-weight: 700; font-size: var(--fs-sm); }
 .tt-block__title, .tt-block__meta { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.tt-block__name { min-inline-size: 0; overflow: hidden; text-overflow: ellipsis; }
 .tt-block__meta { color: var(--text-muted); }
 .tt-block .type-icon { color: var(--c); flex: none; }
 

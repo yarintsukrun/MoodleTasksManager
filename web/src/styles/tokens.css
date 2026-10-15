@@ -2,9 +2,9 @@
  * Design tokens. Light is the default; dark applies via prefers-color-scheme unless
  * <html data-theme="light"> is set, or always with <html data-theme="dark">.
  *
- * Course colors: --course-0 … --course-7 are "ink" colors with ≥4.5:1 contrast on --surface
- * and --bg in their theme (usable for text, dots, borders). --course-N-soft is a tint for
- * backgrounds; put --text on top of it. Never convey meaning by color alone.
+ * Course colors: --course-0 … --course-7 are "ink" colors with ≥4.5:1 contrast on --surface,
+ * --bg, --surface-2 and their own 14% tint in their theme (usable for text, dots, borders).
+ * --course-N-soft is a tint for backgrounds; put --text on top of it. Never convey meaning by color alone.
  */
 :root {
   color-scheme: light;
@@ -15,10 +15,10 @@
   --surface-2: #eef0f6;
   --surface-3: #e2e6ef;
   --border: #d5dae5;
-  --border-strong: #aeb6c7;
+  --border-strong: #7d8699; /* 3.7:1 on surface: input/checkbox/ring boundaries (WCAG 1.4.11) */
   --text: #161a23;
   --text-muted: #4f5869; /* 7.0:1 on surface */
-  --text-subtle: #667085; /* 4.9:1 on surface */
+  --text-subtle: #5d6779; /* 5.7:1 on surface, 5.0:1 on surface-2 */
   --overlay: rgb(15 18 26 / 0.45);
 
   /* Brand / interactive */
@@ -33,27 +33,27 @@
   --danger-soft: #fde8e6;
   --warning: #9a5800;
   --warning-soft: #fff1d6;
-  --success: #17803d;
+  --success: #147437;
   --success-soft: #e2f5e8;
   --neutral: #4f5869;
   --neutral-soft: #eef0f6;
 
   /* Event-type accents */
   --type-assignment: #3b5bdb;
-  --type-quiz: #a33ec9;
-  --type-class: #0f766e;
-  --type-online: #0b6fb0;
+  --type-quiz: #993abd;
+  --type-class: #0f726b;
+  --type-online: #0b69a6;
   --type-other: #5f6878;
 
   /* Course palette (light) */
   --course-0: #1d4ed8; /* blue    6.7:1 */
-  --course-1: #047857; /* emerald 5.5:1 */
+  --course-1: #047454; /* emerald 5.8:1 */
   --course-2: #6d28d9; /* violet  7.1:1 */
-  --course-3: #c2410c; /* orange  5.2:1 */
+  --course-3: #b63d0c; /* orange  5.7:1 */
   --course-4: #be185d; /* pink    6.0:1 */
-  --course-5: #0e7490; /* cyan    5.4:1 */
-  --course-6: #a16207; /* amber   4.9:1 */
-  --course-7: #4d7c0f; /* lime    5.1:1 */
+  --course-5: #0e6e88; /* cyan    5.8:1 */
+  --course-6: #925907; /* amber   5.8:1 */
+  --course-7: #47710f; /* lime    5.8:1 */
   --course-none: #5f6878;
 
   /* Spacing (4px base) */

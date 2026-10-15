@@ -35,7 +35,7 @@ export function AppLayout() {
   return (
     <div className={hasData ? "app app--nav" : "app"}>
       <button type="button" className="skip-link" onClick={() => mainRef.current?.focus()}>
-        דלג לתוכן
+        דלג לתוכן הראשי
       </button>
       {hasData && (
         <nav className="app-nav" aria-label="ניווט ראשי">

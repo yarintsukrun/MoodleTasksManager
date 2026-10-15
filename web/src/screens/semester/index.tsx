@@ -66,7 +66,7 @@ export default function SemesterScreen() {
 
   const insight = (w: Week) => {
     const subs = w.deadlines - w.quizzes;
-    const parts = [subs && `${subs} הגשות`, w.quizzes && `${w.quizzes} בחנים`].filter(Boolean).join(' ו-');
+    const parts = [subs && (subs === 1 ? 'הגשה אחת' : `${subs} הגשות`), w.quizzes && (w.quizzes === 1 ? 'בוחן אחד' : `${w.quizzes} בחנים`)].filter(Boolean).join(' ו-');
     return `שבוע ${w.n} (${w.label}): ${parts} — כדאי להקדים`;
   };
 
@@ -142,7 +142,9 @@ export default function SemesterScreen() {
                       <li key={e.id}>
                         <button type="button" className="sem-row" onClick={() => setOpenId(e.id)}>
                           <TypeIcon type={e.type} size={28} />
-                          <span className="sem-row__title">{e.title}</span>
+                          <span className="sem-row__title" dir="auto">
+                            {e.title}
+                          </span>
                           <span className="muted small num">{fmtDeadline(e.start)}</span>
                           {taskStates[e.id]?.status === 'done' && <span className="sem-done">✓ הוגש</span>}
                         </button>

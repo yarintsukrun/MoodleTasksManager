@@ -4,7 +4,8 @@ import { isDeadlineType } from '../../data';
 import { dayNum, effectiveDue, hm, minuteOf } from './dates';
 
 /** Pin labels are this many minutes tall in the grid; nearby pins stack upward by this much. */
-export const PIN_SPAN = 20;
+/** Minutes per pin label row; 24 min × 64px/h ≈ 26px, keeping pins ≥24px targets (WCAG 2.5.8). */
+export const PIN_SPAN = 24;
 const DEFAULT_START = 8 * 60;
 const DEFAULT_END = 21 * 60;
 

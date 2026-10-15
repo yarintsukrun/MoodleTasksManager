@@ -1,6 +1,7 @@
 /* Today screen. Mobile-first single column; ≥900px two columns. */
 .today__grid {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-6);
 }
 .today__h {
@@ -73,6 +74,27 @@
   flex: 1;
   min-inline-size: 0;
   font-size: var(--fs-sm);
+}
+/* Open-window strip: status line, title, course — stacked so long titles never squeeze the badge. */
+.today-strip__body {
+  flex: 1;
+  min-inline-size: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+.today-strip__body .today-strip__text {
+  flex: none;
+}
+.today-strip__abs {
+  white-space: nowrap;
+  color: var(--text-muted);
+}
+.today-strip__title {
+  align-self: stretch;
+  font-weight: 600;
+  overflow-wrap: anywhere;
 }
 .today-strip__text strong {
   color: var(--s);

@@ -82,6 +82,19 @@ svg {
   border-radius: var(--radius-sm);
 }
 
+/*
+ * User content (Moodle titles, course names) may be English inside the Hebrew UI. Mark it dir="auto"
+ * (or wrap it in <bdi>) so punctuation stays put and ellipsis lands at the text's own end, while
+ * keeping the surrounding RTL alignment.
+ */
+/* (= text-align: match-parent, which Chromium lacks) */
+:where([dir='rtl']) :where([dir='auto']) {
+  text-align: right;
+}
+:where([dir='ltr']) :where([dir='auto']) {
+  text-align: left;
+}
+
 /* Times, dates, counts: digits line up. */
 time,
 .num {

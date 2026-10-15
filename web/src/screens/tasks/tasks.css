@@ -1,6 +1,7 @@
 /* Tasks screen. Mobile-first; ≥900px adds a sticky summary column. */
 .tasks__layout {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-6);
 }
 .tasks__aside {
@@ -156,6 +157,37 @@
   color: var(--text-muted);
   font-size: var(--fs-xs);
   font-weight: 600;
+}
+/* Quiz/lab open window on the closing row. Dot shape differs open (filled) vs not yet (ring). */
+.task-row__window {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 1px var(--space-2);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-pill);
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+  white-space: nowrap;
+}
+.task-row__window-dot {
+  inline-size: 8px;
+  block-size: 8px;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+}
+.task-row__window--open {
+  border-style: solid;
+  border-color: color-mix(in srgb, var(--success) 45%, transparent);
+  background: var(--success-soft);
+  color: var(--text);
+}
+.task-row__window--open strong {
+  color: var(--success);
+}
+.task-row__window--open .task-row__window-dot {
+  border-color: var(--success);
+  background: var(--success);
 }
 .task-row__estimate svg {
   inline-size: 12px;

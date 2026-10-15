@@ -195,7 +195,7 @@ export default function TimetableScreen() {
                 })
               }
             >
-              {c.name}
+              <bdi>{c.name}</bdi>
             </Chip>
           ))}
         </div>

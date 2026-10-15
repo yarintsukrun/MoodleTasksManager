@@ -94,6 +94,7 @@ export default function TodayScreen() {
     );
 
   const load = week.length <= 2 ? 'נמוך' : week.length <= 4 ? 'בינוני' : 'גבוה';
+  const deadlinesLabel = week.length === 1 ? 'הגשה אחת' : `${week.length} הגשות`;
 
   return (
     <div className="today">
@@ -105,7 +106,12 @@ export default function TodayScreen() {
             <Icon name="alert" aria-hidden="true" />
             <span className="today-strip__text num">
               <strong>{overdue.length} באיחור</strong>
-              {overdue.length === 1 && ` · ${overdue[0]!.title}`}
+              {overdue.length === 1 && (
+                <>
+                  {' · '}
+                  <bdi>{overdue[0]!.title}</bdi>
+                </>
+              )}
             </span>
             <span className="today-strip__go">למשימות</span>
           </Link>
@@ -113,10 +119,16 @@ export default function TodayScreen() {
         {openQuizzes.map((q) => (
           <button key={q.id} type="button" className="today-strip today-strip--quiz" onClick={() => setOpenId(q.id)} aria-haspopup="dialog">
             <TypeIcon type="quiz_close" size={28} plain />
-            <span className="today-strip__text">
-              <strong>בוחן פתוח עכשיו</strong> · {q.title} · נסגר {fmtRelative(q.start, now)}
+            <span className="today-strip__body">
+              <span className="today-strip__text">
+                <strong>פתוח עכשיו</strong> · נסגר {fmtRelative(q.start, now)}
+                <span className="today-strip__abs num"> · {fmtDeadline(q.start)}</span>
+              </span>
+              <span className="today-strip__title" dir="auto">
+                {q.title}
+              </span>
+              <CourseBadge courseId={q.courseId} name={q.courseName} />
             </span>
-            <CourseBadge courseId={q.courseId} name={q.courseName} />
           </button>
         ))}
       </div>
@@ -163,8 +175,9 @@ export default function TodayScreen() {
                 <Icon name="timetable" aria-hidden="true" />
                 השבוע
               </h2>
-              <span className="today-load num" aria-label={`${week.length} הגשות ב-7 הימים הקרובים, עומס ${load}`}>
-                <span aria-hidden="true">{week.length} הגשות</span>
+              <span className="today-load num">
+                <span className="visually-hidden">{`${deadlinesLabel} ב-7 הימים הקרובים, עומס ${load}`}</span>
+                <span aria-hidden="true">{deadlinesLabel}</span>
                 <span className="today-load__bar" aria-hidden="true">
                   {Array.from({ length: 6 }, (_, i) => (
                     <span key={i} className={i < week.length ? 'is-on' : undefined} />
@@ -187,7 +200,9 @@ export default function TodayScreen() {
                         <li key={e.id}>
                           <button type="button" className="today-week__row" onClick={() => setOpenId(e.id)} aria-haspopup="dialog">
                             <TypeIcon type={e.type} size={28} />
-                            <span className="today-week__title">{e.title}</span>
+                            <span className="today-week__title" dir="auto">
+                              {e.title}
+                            </span>
                             <CourseBadge courseId={e.courseId} name={e.courseName} />
                             <time className="today-week__time num" dateTime={new Date(e.start).toISOString()}>
                               {fmtTime(dueDayInstant(e.start))}
@@ -223,7 +238,9 @@ function Hero({ event: e, now, onDone, onOpen }: { event: MoodleEvent; now: numb
       <div className="today-hero__top">
         <TypeIcon type={e.type} size={40} />
         <div className="today-hero__titles">
-          <p className="today-hero__title">{e.title}</p>
+          <p className="today-hero__title" dir="auto">
+            {e.title}
+          </p>
           <CourseBadge courseId={e.courseId} name={e.courseName} />
         </div>
         <UrgencyBadge urgency={getUrgency(e, undefined, now)} tone={tone} />
@@ -259,9 +276,9 @@ function ClassRow({ event: e, now, onOpen }: { event: MoodleEvent; now: number; 
         <span className="today-class__body">
           <span className="today-class__title">
             <TypeIcon type={e.type} size={20} plain />
-            {e.courseName ?? e.title}
+            <bdi>{e.courseName ?? e.title}</bdi>
           </span>
-          {(e.location || e.courseName) && <span className="today-class__sub">{e.location && !/^https?:/.test(e.location) ? e.location : e.title}</span>}
+          {(e.location || e.courseName) && <span className="today-class__sub" dir="auto">{e.location && !/^https?:/.test(e.location) ? e.location : e.title}</span>}
         </span>
         {state === 'now' && <span className="today-class__now">עכשיו</span>}
         {state === 'past' && <span className="visually-hidden">(הסתיים)</span>}

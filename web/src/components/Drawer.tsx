@@ -52,7 +52,7 @@ export function Drawer({ open, onClose, title, children }: { open: boolean; onCl
       <div ref={panelRef} className="drawer" role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1}>
         <div className="drawer__grip" aria-hidden="true" />
         <div className="drawer__head">
-          <h2 id={titleId} className="drawer__title">
+          <h2 id={titleId} className="drawer__title" dir="auto">
             {title}
           </h2>
           <button type="button" className="icon-btn" onClick={onClose} aria-label="סגור">

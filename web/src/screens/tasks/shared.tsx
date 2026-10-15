@@ -1,5 +1,5 @@
 // Helpers shared by the Tasks and Today screens: due-day math, status toggle, "marked done" undo toast.
-import { useCallback, useEffect, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import type { MoodleEvent, TaskStatus } from '@mtm/core';
 import { Icon } from '../../components';
 import { fmtDate, getLocalParts, useStore } from '../../data';
@@ -57,6 +57,13 @@ export function useStatusWithUndo(): { setStatus: (e: MoodleEvent, status: TaskS
   const { taskStates, setTaskStatus } = useStore();
   const [pending, setPending] = useState<Pending | null>(null);
   const [paused, setPaused] = useState(false);
+  const undoRef = useRef<HTMLButtonElement>(null);
+
+  // The row that was just marked done may unmount (it moves to the collapsed "הוגש" group).
+  // Don't drop keyboard focus on <body>: hand it to the toast's undo button.
+  useEffect(() => {
+    if (pending && (document.activeElement === document.body || document.activeElement === null)) undoRef.current?.focus();
+  }, [pending]);
 
   useEffect(() => {
     if (!pending || paused) return;
@@ -91,9 +98,9 @@ export function useStatusWithUndo(): { setStatus: (e: MoodleEvent, status: TaskS
         >
           <Icon name="check" className="undo-toast__icon" />
           <span className="undo-toast__text">
-            סומן כהוגש: <strong>{pending.title}</strong>
+            סומן כהוגש: <strong><bdi>{pending.title}</bdi></strong>
           </span>
-          <button type="button" className="undo-toast__btn" onClick={undo}>
+          <button ref={undoRef} type="button" className="undo-toast__btn" onClick={undo}>
             ביטול
           </button>
           <button type="button" className="icon-btn undo-toast__close" aria-label="סגור הודעה" onClick={() => setPending(null)}>

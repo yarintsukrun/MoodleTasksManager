@@ -78,10 +78,16 @@ export function WeekGrid({ model, columns, colors, nowMinute, onOpen }: Props) {
               >
                 <span className="tt-block__title">
                   <TypeIcon type={b.type} size={16} plain />
-                  {b.courseName ?? b.title}
+                  <span className="tt-block__name" dir="auto">
+                    {b.courseName ?? b.title}
+                  </span>
                 </span>
                 <span className="tt-block__meta num">{b.timeLabel}</span>
-                {b.location && <span className="tt-block__meta">{placeLabel(b.location)}</span>}
+                {b.location && (
+                  <span className="tt-block__meta" dir="auto">
+                    {placeLabel(b.location)}
+                  </span>
+                )}
               </button>
             ))}
 
@@ -101,7 +107,9 @@ export function WeekGrid({ model, columns, colors, nowMinute, onOpen }: Props) {
                 style={{ ...color(p.courseId), '--lm': p.labelMinute - rs - PIN_SPAN, '--ps': PIN_SPAN } as Vars}
               >
                 <TypeIcon type={p.type} size={14} plain />
-                <span className="tt-pin__text">{p.title}</span>
+                <span className="tt-pin__text" dir="auto">
+                  {p.title}
+                </span>
               </button>
             ))}
 

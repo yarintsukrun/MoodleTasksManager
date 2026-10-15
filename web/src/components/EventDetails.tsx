@@ -68,7 +68,7 @@ export function EventDetails({ event }: { event: MoodleEvent }) {
         {event.location && (
           <>
             <dt>מיקום</dt>
-            <dd style={{ overflowWrap: 'anywhere' }}>
+            <dd style={{ overflowWrap: 'anywhere' }} dir="auto">
               {isUrl ? (
                 <a href={event.location} target="_blank" rel="noreferrer">
                   {event.location}
@@ -81,7 +81,7 @@ export function EventDetails({ event }: { event: MoodleEvent }) {
         )}
       </dl>
 
-      {event.description.trim() && <p className="details__desc">{event.description.trim()}</p>}
+      {event.description.trim() && <p className="details__desc" dir="auto">{event.description.trim()}</p>}
 
       {deadline && (
         <section>

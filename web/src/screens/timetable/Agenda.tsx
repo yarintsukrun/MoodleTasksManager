@@ -31,8 +31,8 @@ export function Agenda({ columns, colors, onOpen }: { columns: DayColumn[]; colo
                       <span className="tt-agenda__time num">{it.timeLabel}</span>
                       <TypeIcon type={it.type} size={28} />
                       <span className="tt-agenda__text">
-                        <strong>{it.kind === 'block' ? (it.courseName ?? it.title) : it.title}</strong>
-                        <span className="muted small">{it.kind === 'block' ? placeLabel(it.location) : (it.courseName ?? 'אישי')}</span>
+                        <strong dir="auto">{it.kind === 'block' ? (it.courseName ?? it.title) : it.title}</strong>
+                        <span className="muted small" dir="auto">{it.kind === 'block' ? placeLabel(it.location) : (it.courseName ?? 'אישי')}</span>
                       </span>
                     </button>
                   </li>

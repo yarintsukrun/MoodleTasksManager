@@ -13,7 +13,9 @@ export function CourseBadge({ courseId, name }: { courseId: string | undefined; 
   return (
     <span className="course-badge" style={courseColorStyle(idx)} title={label}>
       <span className="course-dot" aria-hidden="true" />
-      <span className="course-badge__name">{label}</span>
+      <span className="course-badge__name" dir="auto">
+        {label}
+      </span>
     </span>
   );
 }

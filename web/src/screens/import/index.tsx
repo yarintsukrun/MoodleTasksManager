@@ -147,7 +147,7 @@ function ImportResult({ summary: s, onContinue, onAgain }: { summary: ImportSumm
   return (
     <div className="stack" style={{ maxInlineSize: 680 }}>
       <PageHeader title="הייבוא הושלם" />
-      <div className="success-box stack" role="status" style={{ ['--stack-gap' as string]: 'var(--space-2)' }}>
+      <div id="import-summary" className="success-box stack" role="status" style={{ ['--stack-gap' as string]: 'var(--space-2)' }}>
         <p className="row" style={{ fontSize: 'var(--fs-lg)', fontWeight: 700 }}>
           <Icon name="check" style={{ color: 'var(--success)' }} />
           <span className="num">
@@ -175,7 +175,7 @@ function ImportResult({ summary: s, onContinue, onAgain }: { summary: ImportSumm
       </section>
 
       <div className="row">
-        <button type="button" className="btn btn--primary" onClick={onContinue} autoFocus>
+        <button type="button" className="btn btn--primary" onClick={onContinue} autoFocus aria-describedby="import-summary">
           זה נראה נכון, המשך
         </button>
         <button type="button" className="btn" onClick={onAgain}>

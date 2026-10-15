@@ -13,7 +13,7 @@ export function CourseSettingsList() {
           <div className="row" style={{ justifyContent: 'space-between' }}>
             <span className="row">
               <span className="course-dot" style={{ ...courseColorStyle(c.colorIndex), ['--dot' as string]: '14px' }} aria-hidden="true" />
-              <strong>{c.name}</strong>
+              <strong dir="auto">{c.name}</strong>
               <span className="muted small num">{c.id}</span>
             </span>
             <label className="switch small">

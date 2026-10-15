@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import type { EventType, MoodleEvent, TaskState, Urgency } from '@mtm/core';
 import { Card, Chip, CourseBadge, CourseDot, EmptyState, EventDrawer, Icon, PageHeader, TypeIcon, URGENCY_LABELS, UrgencyBadge } from '../../components';
-import { deadlineTone, fmtDeadline, fmtRelative, getUrgency, isDeadlineType, useCourses, useNow, useStore, useVisibleEvents } from '../../data';
+import { deadlineTone, fmtDate, fmtDeadline, fmtRelative, fmtTime, getLocalParts, getUrgency, isDeadlineType, useCourses, useNow, useStore, useVisibleEvents } from '../../data';
 import { StatusToggle, NEXT_STATUS, useSessionState, useStatusWithUndo } from './shared';
 import './tasks.css';
 
@@ -32,7 +32,12 @@ interface Item {
   event: MoodleEvent;
   state: TaskState | undefined;
   urgency: Urgency;
+  /** Start of the open window (matching quiz/activity "opens" event), shown on the closing row. */
+  opensAt?: number;
 }
+
+const OPENER: Partial<Record<EventType, EventType>> = { quiz_close: 'quiz_open', activity_close: 'activity_open' };
+const pairKey = (e: MoodleEvent) => `${e.courseId ?? ''}|${e.title.trim()}`;
 
 /** Tasks: every deadline grouped by urgency, with status toggles, filters and search. */
 export default function TasksScreen() {
@@ -46,13 +51,21 @@ export default function TasksScreen() {
   const [openId, setOpenId] = useState<string | null>(null);
 
   // All tasks (before filters): deadline types, plus upcoming quiz openings when requested.
-  const all = useMemo<Item[]>(
-    () =>
-      events
-        .filter((e) => isDeadlineType(e.type) || (filters.showQuizOpen && e.type === 'quiz_open' && e.end >= now))
-        .map((event) => ({ event, state: taskStates[event.id], urgency: getUrgency(event, taskStates[event.id], now) })),
-    [events, taskStates, now, filters.showQuizOpen],
-  );
+  const all = useMemo<Item[]>(() => {
+    const opens = new Map<string, number>();
+    for (const e of events) if (e.type === 'quiz_open' || e.type === 'activity_open') opens.set(`${e.type}|${pairKey(e)}`, e.start);
+    return events
+      .filter((e) => isDeadlineType(e.type) || (filters.showQuizOpen && e.type === 'quiz_open' && e.end >= now))
+      .map((event) => {
+        const opener = OPENER[event.type];
+        return {
+          event,
+          state: taskStates[event.id],
+          urgency: getUrgency(event, taskStates[event.id], now),
+          opensAt: opener ? opens.get(`${opener}|${pairKey(event)}`) : undefined,
+        };
+      });
+  }, [events, taskStates, now, filters.showQuizOpen]);
 
   const q = filters.query.trim().toLowerCase();
   const shown = all.filter(
@@ -120,7 +133,7 @@ export default function TasksScreen() {
                 {taskCourses.map((c) => (
                   <Chip key={c.id} colorIndex={c.colorIndex} selected={filters.courses.includes(c.id)} onToggle={() => setFilters((f) => ({ ...f, courses: toggle(f.courses, c.id) }))}>
                     <CourseDot courseId={c.id} />
-                    {c.name}
+                    <bdi>{c.name}</bdi>
                   </Chip>
                 ))}
               </div>
@@ -216,7 +229,9 @@ export default function TasksScreen() {
                           onClick={() => setFilters((f) => ({ ...f, courses: toggle(f.courses, c.id) }))}
                         >
                           <CourseDot courseId={c.id} />
-                          <span className="tasks__summary-name">{c.name}</span>
+                          <span className="tasks__summary-name" dir="auto">
+                            {c.name}
+                          </span>
                           <span className="num muted">
                             {left}/{total}
                           </span>
@@ -238,7 +253,7 @@ export default function TasksScreen() {
 }
 
 function TaskRow({ item, now, onCycle, onOpen }: { item: Item; now: number; onCycle: () => void; onOpen: () => void }) {
-  const { event: e, state, urgency } = item;
+  const { event: e, state, urgency, opensAt } = item;
   const done = urgency === 'done';
   const actionable = isDeadlineType(e.type);
   const hours = state?.estimateHours;
@@ -250,10 +265,11 @@ function TaskRow({ item, now, onCycle, onOpen }: { item: Item; now: number; onCy
         <span className="task-row__body">
           <span className="task-row__title">
             {e.type === 'quiz_open' && <span className="task-row__tag">נפתח</span>}
-            {e.title}
+            <bdi>{e.title}</bdi>
           </span>
           <span className="task-row__meta">
             <CourseBadge courseId={e.courseId} name={e.courseName} />
+            {!done && opensAt !== undefined && opensAt < e.start && <WindowTag opensAt={opensAt} now={now} />}
             {hours !== undefined && (
               <span className="task-row__estimate num" aria-label={`הערכה: ${hours} שעות`}>
                 <Icon name="clock" aria-hidden="true" />
@@ -274,5 +290,27 @@ function TaskRow({ item, now, onCycle, onOpen }: { item: Item; now: number; onCy
         </span>
       </button>
     </li>
+  );
+}
+
+/** Open/close window of a quiz or lab, shown on its closing row so the pair reads as one window. */
+function WindowTag({ opensAt, now }: { opensAt: number; now: number }) {
+  const open = opensAt <= now;
+  return (
+    <span className={`task-row__window${open ? ' task-row__window--open' : ''}`}>
+      <span className="task-row__window-dot" aria-hidden="true" />
+      {open ? (
+        <>
+          <strong>פתוח עכשיו</strong>{' '}
+          <span className="num">
+            מ-{getLocalParts(opensAt).day}.{getLocalParts(opensAt).month}
+          </span>
+        </>
+      ) : (
+        <span className="num">
+          נפתח {fmtDate(opensAt)} · {fmtTime(opensAt)}
+        </span>
+      )}
+    </span>
   );
 }
