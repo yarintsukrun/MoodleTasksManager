@@ -54,6 +54,25 @@ const ics = [
     DTSTART:20261026T154546Z
     DTEND:20261026T174546Z
     CATEGORIES:22222-קורס ב`),
+  // Course shortname with a section suffix, misspelled attendance name.
+  vevent(`UID:30159@moodle.huji.ac.il/2026-27
+    SUMMARY:C Lab week 1 opens
+    LAST-MODIFIED:20261005T165430Z
+    DTSTART:20261011T050000Z
+    DTEND:20261011T050000Z
+    CATEGORIES:33333_1-קורס ג++`),
+  vevent(`UID:58064@moodle.huji.ac.il/2026-27
+    SUMMARY:רישום נכחות 1
+    LAST-MODIFIED:20261014T075234Z
+    DTSTART:20261014T070000Z
+    DTEND:20261014T084500Z
+    CATEGORIES:44444-קורס ד`),
+  vevent(`UID:10271@moodle.huji.ac.il/2026-27
+    SUMMARY:הגשת עבודה is due
+    LAST-MODIFIED:20261014T064205Z
+    DTSTART:20261104T174200Z
+    DTEND:20261104T174200Z
+    CATEGORIES:44444-קורס ד`),
   'END:VCALENDAR',
 ].join('\r\n');
 
@@ -72,7 +91,16 @@ describe('HUJI 2026-27 export shapes', () => {
       expect(byId.get(id)?.courseId).toBeUndefined();
       expect(byId.get(id)?.type).toBe('other');
     }
-    expect(extractCourses(events).map((c) => c.id).sort()).toEqual(['11111', '22222']);
+    expect(extractCourses(events).map((c) => c.id).sort()).toEqual(['11111', '22222', '33333', '44444']);
+  });
+
+  it('drops the section suffix from course shortnames', () => {
+    expect(byId.get('30159')).toMatchObject({ courseId: '33333', courseName: 'קורס ג++', courseShortname: '33333_1-קורס ג++', type: 'quiz_open' });
+  });
+
+  it('handles a misspelled attendance name and a Hebrew title with an English suffix', () => {
+    expect(byId.get('58064')?.type).toBe('class_session');
+    expect(byId.get('10271')).toMatchObject({ type: 'assignment', title: 'הגשת עבודה' });
   });
 
   it('classifies "X is due" as an assignment', () => {
@@ -81,7 +109,7 @@ describe('HUJI 2026-27 export shapes', () => {
 
   it('builds one weekly slot from renamed attendance sessions across DST', () => {
     expect(byId.get('44325')?.type).toBe('class_session');
-    const slots = deriveWeeklySlots(events);
+    const slots = deriveWeeklySlots(events).filter((s) => s.courseId === '22222');
     expect(slots).toHaveLength(1);
     expect(slots[0]).toMatchObject({ courseId: '22222', weekday: 1, startMinute: 17 * 60 + 45, endMinute: 19 * 60 + 45 });
     expect(slots[0]?.eventIds.sort()).toEqual(['44325', '44331']);

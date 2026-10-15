@@ -44,10 +44,13 @@ function timeValue(comp: Component, name: string): number | undefined {
   return Number.isFinite(ms) ? ms : undefined;
 }
 
-/** "67528-הנדסת תוכנה" → { id: "67528", name: "הנדסת תוכנה" }. */
+/**
+ * "67528-הנדסת תוכנה" → { id: "67528", name: "הנדסת תוכנה" }.
+ * A section suffix ("67315_1-…") is dropped so all Moodle sections of a course share one id.
+ */
 export function parseCourseShortname(shortname: string): { courseId: string; courseName: string } {
   const s = shortname.trim();
-  const m = /^(\d+)\s*-\s*(.*)$/.exec(s);
+  const m = /^(\d+)(?:_\d+)?\s*-\s*(.*)$/.exec(s);
   if (m) {
     const id = m[1] ?? s;
     return { courseId: id, courseName: (m[2] ?? '').trim() || id };
